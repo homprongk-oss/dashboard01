@@ -1,0 +1,2486 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>บัญชีรายการยาของร้านยาจำลอง — Pharmacy Drug Master Dashboard</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <!-- Google Fonts: Noto Sans Thai & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans Thai"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root {
+      --netflix-canvas: #000000;
+      --netflix-surface-deep: #161616;
+      --netflix-surface-card: #232323;
+      --netflix-surface-input: #2d2d2d;
+      --netflix-ink: #ffffff;
+      --netflix-muted: #808080;
+      --netflix-hairline: #414141;
+      --netflix-red: #e50914;
+    }
+
+    body {
+      background-color: #f8fafc;
+      color: #0f172a;
+      font-family: 'Noto Sans Thai', system-ui, sans-serif;
+    }
+
+    /* Custom subtle scrollbars for tables and matrix */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Smooth fade-in animation for mode transitions */
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .mode-panel-animate {
+      animation: fadeSlideIn 0.25s ease-out forwards;
+    }
+
+    body.dark-mode {
+      background-color: var(--netflix-canvas);
+      color: var(--netflix-ink);
+      color-scheme: dark;
+    }
+
+    body.dark-mode [class~="bg-white"],
+    body.dark-mode [class~="bg-white/90"],
+    body.dark-mode [class~="bg-white/60"]:hover,
+    body.dark-mode [class~="bg-white/95"],
+    body.dark-mode [class~="focus:bg-white"]:focus {
+      background-color: var(--netflix-surface-deep) !important;
+    }
+
+    body.dark-mode [class~="bg-slate-50"],
+    body.dark-mode [class~="bg-slate-50/70"],
+    body.dark-mode [class~="bg-slate-50/90"],
+    body.dark-mode [class~="bg-slate-50/90"]:hover {
+      background-color: var(--netflix-surface-card) !important;
+    }
+
+    body.dark-mode [class~="bg-slate-100"],
+    body.dark-mode [class~="bg-slate-100/90"],
+    body.dark-mode [class~="bg-slate-200/70"] {
+      background-color: var(--netflix-surface-card) !important;
+    }
+
+    body.dark-mode [class~="bg-teal-50"],
+    body.dark-mode [class~="bg-teal-50/70"],
+    body.dark-mode [class~="bg-indigo-50"],
+    body.dark-mode [class~="bg-indigo-50/70"],
+    body.dark-mode [class~="bg-indigo-50/90"],
+    body.dark-mode [class~="bg-sky-50"],
+    body.dark-mode [class~="bg-sky-50/90"],
+    body.dark-mode [class~="bg-amber-50"],
+    body.dark-mode [class~="bg-amber-50/95"],
+    body.dark-mode [class~="bg-emerald-50"],
+    body.dark-mode [class~="bg-emerald-50/70"],
+    body.dark-mode [class~="bg-emerald-50/90"],
+    body.dark-mode [class~="bg-emerald-50/95"],
+    body.dark-mode [class~="bg-rose-50"],
+    body.dark-mode [class~="bg-rose-50/95"],
+    body.dark-mode [class~="bg-teal-100"],
+    body.dark-mode [class~="bg-amber-100"],
+    body.dark-mode [class~="bg-emerald-100"],
+    body.dark-mode [class~="bg-emerald-100/90"],
+    body.dark-mode [class~="bg-rose-100"] {
+      background-color: var(--netflix-surface-card) !important;
+    }
+
+    body.dark-mode [class~="bg-slate-900"] {
+      background-color: var(--netflix-surface-card) !important;
+    }
+
+    body.dark-mode [class~="bg-slate-900"]:hover {
+      background-color: var(--netflix-surface-input) !important;
+    }
+
+    body.dark-mode [class~="bg-slate-200/70"],
+    body.dark-mode [class~="hover:bg-slate-50"]:hover,
+    body.dark-mode [class~="hover:bg-slate-50/90"]:hover,
+    body.dark-mode [class~="hover:bg-slate-100"]:hover,
+    body.dark-mode [class~="hover:bg-white/60"]:hover {
+      background-color: var(--netflix-surface-input) !important;
+    }
+
+    body.dark-mode [class~="text-slate-900"],
+    body.dark-mode [class~="text-slate-800"],
+    body.dark-mode [class~="text-slate-700"],
+    body.dark-mode [class~="text-slate-600"],
+    body.dark-mode [class~="text-teal-400"],
+    body.dark-mode [class~="text-teal-600"],
+    body.dark-mode [class~="text-teal-700"],
+    body.dark-mode [class~="text-teal-800"],
+    body.dark-mode [class~="text-teal-900"],
+    body.dark-mode [class~="text-indigo-600"],
+    body.dark-mode [class~="text-indigo-700"],
+    body.dark-mode [class~="text-indigo-800"],
+    body.dark-mode [class~="text-indigo-900"],
+    body.dark-mode [class~="text-indigo-950"],
+    body.dark-mode [class~="text-emerald-600"],
+    body.dark-mode [class~="text-emerald-700"],
+    body.dark-mode [class~="text-emerald-800"],
+    body.dark-mode [class~="text-emerald-900"],
+    body.dark-mode [class~="text-emerald-950"],
+    body.dark-mode [class~="text-amber-600"],
+    body.dark-mode [class~="text-amber-700"],
+    body.dark-mode [class~="text-amber-800"],
+    body.dark-mode [class~="text-rose-600"],
+    body.dark-mode [class~="text-rose-700"],
+    body.dark-mode [class~="text-rose-800"],
+    body.dark-mode [class~="text-sky-600"],
+    body.dark-mode [class~="text-sky-700"],
+    body.dark-mode [class~="text-sky-800"] {
+      color: var(--netflix-ink) !important;
+    }
+
+    body.dark-mode [class~="text-slate-600"],
+    body.dark-mode [class~="text-slate-500"],
+    body.dark-mode [class~="text-slate-400"],
+    body.dark-mode [class~="text-slate-300"] {
+      color: var(--netflix-muted) !important;
+    }
+
+    body.dark-mode [class~="border-slate-100"],
+    body.dark-mode [class~="border-slate-200"],
+    body.dark-mode [class~="border-slate-300"],
+    body.dark-mode [class~="border-slate-200/80"],
+    body.dark-mode [class~="border-slate-200/90"],
+    body.dark-mode [class~="border-teal-200"],
+    body.dark-mode [class~="border-teal-200/80"],
+    body.dark-mode [class~="border-indigo-200"],
+    body.dark-mode [class~="border-indigo-200/80"],
+    body.dark-mode [class~="border-emerald-200"],
+    body.dark-mode [class~="border-emerald-200/80"],
+    body.dark-mode [class~="border-amber-200"],
+    body.dark-mode [class~="border-rose-200"],
+    body.dark-mode [class~="border-sky-200"] {
+      border-color: var(--netflix-hairline) !important;
+    }
+
+    body.dark-mode [class~="divide-slate-100"] > :not([hidden]) ~ :not([hidden]) {
+      border-color: var(--netflix-hairline) !important;
+    }
+
+    body.dark-mode [class~="ring-slate-200/80"],
+    body.dark-mode [class~="ring-teal-200"],
+    body.dark-mode [class~="ring-indigo-200"],
+    body.dark-mode [class~="ring-emerald-200"] {
+      --tw-ring-color: var(--netflix-hairline) !important;
+    }
+
+    body.dark-mode button.bg-slate-900 {
+      background-color: var(--netflix-red) !important;
+      color: var(--netflix-ink) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    body.dark-mode button.bg-slate-900:hover {
+      background-color: #b20710 !important;
+    }
+
+    body.dark-mode [class~="bg-gradient-to-br"] {
+      background-image: none !important;
+      background-color: var(--netflix-surface-card) !important;
+    }
+
+    body.dark-mode [class~="hover:text-slate-900"]:hover {
+      color: var(--netflix-ink) !important;
+    }
+
+    body.dark-mode input,
+    body.dark-mode select {
+      background-color: var(--netflix-surface-input) !important;
+      color: var(--netflix-ink) !important;
+      color-scheme: dark;
+      box-shadow: inset 0 0 0 1px #7c7c7c;
+    }
+
+    body.dark-mode input:focus,
+    body.dark-mode select:focus {
+      border-color: #7c7c7c !important;
+      --tw-ring-color: #7c7c7c !important;
+    }
+
+    body.dark-mode option {
+      background-color: var(--netflix-surface-input);
+      color: var(--netflix-ink);
+    }
+
+    body.dark-mode ::selection {
+      background-color: var(--netflix-hairline);
+      color: var(--netflix-ink);
+    }
+
+    body.dark-mode ::-webkit-scrollbar-track {
+      background: var(--netflix-canvas);
+    }
+
+    body.dark-mode ::-webkit-scrollbar-thumb {
+      background: var(--netflix-hairline);
+    }
+
+    body.dark-mode ::-webkit-scrollbar-thumb:hover {
+      background: var(--netflix-muted);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased dark-mode">
+
+  <!-- Inline Notification Banner (Replaces alert/confirm) -->
+  <div id="toastBanner" class="fixed bottom-4 right-4 z-50 hidden max-w-md transition-all duration-300">
+    <div id="toastContent" class="flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg bg-white">
+      <span id="toastIcon" class="text-lg mt-0.5">ℹ️</span>
+      <div class="flex-1 text-sm">
+        <p id="toastTitle" class="font-semibold text-slate-900"></p>
+        <p id="toastMessage" class="text-slate-600 mt-0.5"></p>
+      </div>
+      <button type="button" onclick="hideToast()" class="text-slate-400 hover:text-slate-600 text-sm font-bold px-1">✕</button>
+    </div>
+  </div>
+
+  <!-- Top Clinical Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <!-- Brand & Dataset Metadata -->
+        <div class="flex items-start gap-3.5">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-600 text-white flex items-center justify-center shadow-sm shrink-0 mt-0.5">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 id="metaTitle" class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+                บัญชีรายการยาของร้านยาจำลอง
+              </h1>
+              <span id="metaCountBadge" class="inline-flex items-center gap-1 rounded-full bg-teal-50 border border-teal-200 px-2.5 py-0.5 text-xs font-semibold text-teal-700">
+                100 รายการ (SKUs)
+              </span>
+              <span id="metaCatBadge" class="inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-700">
+                14 หมวดหมู่
+              </span>
+            </div>
+            <p id="metaNote" class="text-xs text-slate-500 mt-1 max-w-3xl leading-relaxed">
+              ชื่อสามัญ ความแรง รูปแบบยา และรหัส ATC เป็นข้อมูลจริง (รหัส ATC ตรวจกับ WHO ATC/DDD Index ฉบับ 2026); reorder_level เป็นนโยบายสมมติของร้าน
+            </p>
+          </div>
+        </div>
+
+        <!-- JSON Upload & Reset Controls -->
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+          <input type="file" id="jsonFileInput" accept=".json,application/json" class="hidden" />
+          <button
+            type="button"
+            onclick="document.getElementById('jsonFileInput').click()"
+            class="inline-flex items-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-medium px-3.5 py-2.5 shadow-xs transition cursor-pointer"
+          >
+            <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            <span>โหลดไฟล์ drugs.json</span>
+          </button>
+          <button
+            id="resetDefaultBtn"
+            type="button"
+            onclick="resetToDefaultData()"
+            class="hidden inline-flex items-center gap-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs sm:text-sm font-medium px-3 py-2.5 transition cursor-pointer"
+            title="กลับไปใช้ข้อมูล drugs.json เริ่มต้นที่ฝังในระบบ"
+          >
+            <span>↺ รีเซ็ตข้อมูลเริ่มต้น</span>
+          </button>
+          <button
+            id="darkModeToggle"
+            type="button"
+            onclick="toggleDarkMode()"
+            aria-label="ปิดโหมดมืด"
+            aria-pressed="true"
+            class="inline-flex items-center gap-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2.5 transition cursor-pointer"
+          >
+            <span id="darkModeIcon" aria-hidden="true">☀️</span>
+            <span id="darkModeLabel">โหมดสว่าง</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Segmented Mode Switcher Bar -->
+      <div class="mt-4 pt-3 border-t border-slate-100">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/80" role="tablist" aria-label="Analytical Dashboard Modes">
+          <!-- Mode 1 Tab -->
+          <button
+            type="button"
+            id="tab-inventory"
+            role="tab"
+            aria-selected="true"
+            onclick="switchMode('inventory')"
+            class="mode-tab flex items-center justify-center sm:justify-start gap-2.5 rounded-xl px-4 py-2.5 text-left transition-all duration-200 bg-white text-teal-800 shadow-sm ring-1 ring-slate-200/80 cursor-pointer"
+          >
+            <span class="text-lg">📦</span>
+            <div>
+              <div class="text-xs sm:text-sm font-bold leading-tight">คลังยาและจุดสั่งซื้อ</div>
+              <div class="text-[11px] text-slate-500 hidden sm:block">Inventory & Reorder Policy</div>
+            </div>
+          </button>
+
+          <!-- Mode 2 Tab -->
+          <button
+            type="button"
+            id="tab-clinical"
+            role="tab"
+            aria-selected="false"
+            onclick="switchMode('clinical')"
+            class="mode-tab flex items-center justify-center sm:justify-start gap-2.5 rounded-xl px-4 py-2.5 text-left transition-all duration-200 text-slate-600 hover:text-slate-900 hover:bg-white/60 cursor-pointer"
+          >
+            <span class="text-lg">⚕️</span>
+            <div>
+              <div class="text-xs sm:text-sm font-bold leading-tight">เภสัชวิทยาและรหัส ATC</div>
+              <div class="text-[11px] text-slate-500 hidden sm:block">Clinical & WHO ATC Focus</div>
+            </div>
+          </button>
+
+          <!-- Mode 3 Tab -->
+          <button
+            type="button"
+            id="tab-executive"
+            role="tab"
+            aria-selected="false"
+            onclick="switchMode('executive')"
+            class="mode-tab flex items-center justify-center sm:justify-start gap-2.5 rounded-xl px-4 py-2.5 text-left transition-all duration-200 text-slate-600 hover:text-slate-900 hover:bg-white/60 cursor-pointer"
+          >
+            <span class="text-lg">📊</span>
+            <div>
+              <div class="text-xs sm:text-sm font-bold leading-tight">ภาพรวมธุรกิจและหมวดหมู่</div>
+              <div class="text-[11px] text-slate-500 hidden sm:block">Executive & Assortment Overview</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Analytical Content Container -->
+  <main id="dashboardContainer" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- Rendered dynamically per active mode -->
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 bg-white mt-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+      <div>Pharmacy Drug Master Analytics • อ้างอิงรหัสมาตรฐาน WHO ATC/DDD Index 2026</div>
+      <div id="footerSummary" class="font-mono text-slate-400">Dataset: drugs.json (100 items)</div>
+    </div>
+  </footer>
+
+  <script>
+    // =========================================================================
+    // 1. EMBEDDED DATASET (Exact 100-item drugs.json)
+    // =========================================================================
+    const DEFAULT_DRUGS_DATA = {
+      "meta": {
+        "title": "บัญชีรายการยาของร้านยาจำลอง",
+        "note": "ชื่อสามัญ ความแรง รูปแบบยา และรหัส ATC เป็นข้อมูลจริง (รหัส ATC ตรวจกับ WHO ATC/DDD Index ฉบับ 2026); reorder_level เป็นนโยบายสมมติของร้าน",
+        "categories": [
+          "แก้ปวดและต้านการอักเสบ",
+          "ยาปฏิชีวนะ",
+          "ต้านเชื้อรา ไวรัส และพยาธิ",
+          "หัวใจและความดันโลหิต",
+          "เบาหวาน",
+          "ไขมันในเลือด",
+          "ทางเดินอาหาร",
+          "แก้แพ้",
+          "ทางเดินหายใจ",
+          "ผิวหนัง",
+          "ตาและหู",
+          "วิตามินและเกลือแร่",
+          "ระบบประสาท",
+          "ข้อและกล้ามเนื้อ"
+        ],
+        "count": 100
+      },
+      "items": [
+        {"sku": "PARA500", "generic_name": "Paracetamol", "strength": "500 mg", "dosage_form": "tablet", "unit": "tablet", "category": "แก้ปวดและต้านการอักเสบ", "atc_code": "N02BE01", "reorder_level": 500},
+        {"sku": "PARA120S", "generic_name": "Paracetamol", "strength": "120 mg/5 mL, 60 mL", "dosage_form": "syrup", "unit": "bottle", "category": "แก้ปวดและต้านการอักเสบ", "atc_code": "N02BE01", "reorder_level": 20},
+        {"sku": "IBU400", "generic_name": "Ibuprofen", "strength": "400 mg", "dosage_form": "tablet", "unit": "tablet", "category": "แก้ปวดและต้านการอักเสบ", "atc_code": "M01AE01", "reorder_level": 300},
+        {"sku": "IBU100S", "generic_name": "Ibuprofen", "strength": "100 mg/5 mL, 60 mL", "dosage_form": "suspension", "unit": "bottle", "category": "แก้ปวดและต้านการอักเสบ", "atc_code": "M01AE01", "reorder_level": 10},
+        {"sku": "NAPRO250", "generic_name": "Naproxen", "strength": "250 mg", "dosage_form": "tablet", "unit": "tablet", "category": "แก้ปวดและต้านการอักเสบ", "atc_code": "M01AE02", "reorder_level": 100},
+        {"sku": "DICLO25", "generic_name": "Diclofenac sodium", "strength": "25 mg", "dosage_form": "tablet", "unit": "tablet", "category": "แก้ปวดและต้านการอักเสบ", "atc_code": "M01AB05", "reorder_level": 200},
+        {"sku": "DICLOGEL", "generic_name": "Diclofenac diethylamine", "strength": "1%, 30 g", "dosage_form": "gel", "unit": "tube", "category": "แก้ปวดและต้านการอักเสบ", "atc_code": "M02AA15", "reorder_level": 10},
+        {"sku": "MEFE250", "generic_name": "Mefenamic acid", "strength": "250 mg", "dosage_form": "capsule", "unit": "capsule", "category": "แก้ปวดและต้านการอักเสบ", "atc_code": "M01AG01", "reorder_level": 200},
+        {"sku": "CELE200", "generic_name": "Celecoxib", "strength": "200 mg", "dosage_form": "capsule", "unit": "capsule", "category": "แก้ปวดและต้านการอักเสบ", "atc_code": "M01AH01", "reorder_level": 60},
+        {"sku": "AMOX500", "generic_name": "Amoxicillin", "strength": "500 mg", "dosage_form": "capsule", "unit": "capsule", "category": "ยาปฏิชีวนะ", "atc_code": "J01CA04", "reorder_level": 300},
+        {"sku": "AMOX125S", "generic_name": "Amoxicillin", "strength": "125 mg/5 mL, 60 mL", "dosage_form": "dry syrup", "unit": "bottle", "category": "ยาปฏิชีวนะ", "atc_code": "J01CA04", "reorder_level": 10},
+        {"sku": "AMCLAV875", "generic_name": "Amoxicillin/Clavulanic acid", "strength": "875/125 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ยาปฏิชีวนะ", "atc_code": "J01CR02", "reorder_level": 60},
+        {"sku": "DICLOX250", "generic_name": "Dicloxacillin", "strength": "250 mg", "dosage_form": "capsule", "unit": "capsule", "category": "ยาปฏิชีวนะ", "atc_code": "J01CF01", "reorder_level": 200},
+        {"sku": "CEPH500", "generic_name": "Cephalexin", "strength": "500 mg", "dosage_form": "capsule", "unit": "capsule", "category": "ยาปฏิชีวนะ", "atc_code": "J01DB01", "reorder_level": 200},
+        {"sku": "AZI250", "generic_name": "Azithromycin", "strength": "250 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ยาปฏิชีวนะ", "atc_code": "J01FA10", "reorder_level": 60},
+        {"sku": "DOXY100", "generic_name": "Doxycycline", "strength": "100 mg", "dosage_form": "capsule", "unit": "capsule", "category": "ยาปฏิชีวนะ", "atc_code": "J01AA02", "reorder_level": 100},
+        {"sku": "NORF400", "generic_name": "Norfloxacin", "strength": "400 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ยาปฏิชีวนะ", "atc_code": "J01MA06", "reorder_level": 100},
+        {"sku": "CIPRO500", "generic_name": "Ciprofloxacin", "strength": "500 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ยาปฏิชีวนะ", "atc_code": "J01MA02", "reorder_level": 100},
+        {"sku": "COTRI480", "generic_name": "Sulfamethoxazole/Trimethoprim", "strength": "400/80 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ยาปฏิชีวนะ", "atc_code": "J01EE01", "reorder_level": 100},
+        {"sku": "NITRO100", "generic_name": "Nitrofurantoin", "strength": "100 mg", "dosage_form": "capsule", "unit": "capsule", "category": "ยาปฏิชีวนะ", "atc_code": "J01XE01", "reorder_level": 60},
+        {"sku": "METRO400", "generic_name": "Metronidazole", "strength": "400 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ต้านเชื้อรา ไวรัส และพยาธิ", "atc_code": "P01AB01", "reorder_level": 100},
+        {"sku": "FLUCO150", "generic_name": "Fluconazole", "strength": "150 mg", "dosage_form": "capsule", "unit": "capsule", "category": "ต้านเชื้อรา ไวรัส และพยาธิ", "atc_code": "J02AC01", "reorder_level": 30},
+        {"sku": "CLOTRI-C", "generic_name": "Clotrimazole", "strength": "1%, 15 g", "dosage_form": "cream", "unit": "tube", "category": "ต้านเชื้อรา ไวรัส และพยาธิ", "atc_code": "D01AC01", "reorder_level": 20},
+        {"sku": "KETO-C", "generic_name": "Ketoconazole", "strength": "2%, 15 g", "dosage_form": "cream", "unit": "tube", "category": "ต้านเชื้อรา ไวรัส และพยาธิ", "atc_code": "D01AC08", "reorder_level": 10},
+        {"sku": "ACYC400", "generic_name": "Acyclovir", "strength": "400 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ต้านเชื้อรา ไวรัส และพยาธิ", "atc_code": "J05AB01", "reorder_level": 100},
+        {"sku": "ACYC-C", "generic_name": "Acyclovir", "strength": "5%, 5 g", "dosage_form": "cream", "unit": "tube", "category": "ต้านเชื้อรา ไวรัส และพยาธิ", "atc_code": "D06BB03", "reorder_level": 10},
+        {"sku": "ALBEN200", "generic_name": "Albendazole", "strength": "200 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ต้านเชื้อรา ไวรัส และพยาธิ", "atc_code": "P02CA03", "reorder_level": 50},
+        {"sku": "MEBEN100", "generic_name": "Mebendazole", "strength": "100 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ต้านเชื้อรา ไวรัส และพยาธิ", "atc_code": "P02CA01", "reorder_level": 50},
+        {"sku": "NYST-S", "generic_name": "Nystatin", "strength": "100,000 U/mL, 12 mL", "dosage_form": "oral suspension", "unit": "bottle", "category": "ต้านเชื้อรา ไวรัส และพยาธิ", "atc_code": "A07AA02", "reorder_level": 5},
+        {"sku": "AMLO5", "generic_name": "Amlodipine", "strength": "5 mg", "dosage_form": "tablet", "unit": "tablet", "category": "หัวใจและความดันโลหิต", "atc_code": "C08CA01", "reorder_level": 300},
+        {"sku": "AMLO10", "generic_name": "Amlodipine", "strength": "10 mg", "dosage_form": "tablet", "unit": "tablet", "category": "หัวใจและความดันโลหิต", "atc_code": "C08CA01", "reorder_level": 200},
+        {"sku": "ENAL5", "generic_name": "Enalapril", "strength": "5 mg", "dosage_form": "tablet", "unit": "tablet", "category": "หัวใจและความดันโลหิต", "atc_code": "C09AA02", "reorder_level": 200},
+        {"sku": "LOSAR50", "generic_name": "Losartan", "strength": "50 mg", "dosage_form": "tablet", "unit": "tablet", "category": "หัวใจและความดันโลหิต", "atc_code": "C09CA01", "reorder_level": 300},
+        {"sku": "HCTZ25", "generic_name": "Hydrochlorothiazide", "strength": "25 mg", "dosage_form": "tablet", "unit": "tablet", "category": "หัวใจและความดันโลหิต", "atc_code": "C03AA03", "reorder_level": 200},
+        {"sku": "ATEN50", "generic_name": "Atenolol", "strength": "50 mg", "dosage_form": "tablet", "unit": "tablet", "category": "หัวใจและความดันโลหิต", "atc_code": "C07AB03", "reorder_level": 200},
+        {"sku": "PROP10", "generic_name": "Propranolol", "strength": "10 mg", "dosage_form": "tablet", "unit": "tablet", "category": "หัวใจและความดันโลหิต", "atc_code": "C07AA05", "reorder_level": 200},
+        {"sku": "FURO40", "generic_name": "Furosemide", "strength": "40 mg", "dosage_form": "tablet", "unit": "tablet", "category": "หัวใจและความดันโลหิต", "atc_code": "C03CA01", "reorder_level": 100},
+        {"sku": "SPIRO25", "generic_name": "Spironolactone", "strength": "25 mg", "dosage_form": "tablet", "unit": "tablet", "category": "หัวใจและความดันโลหิต", "atc_code": "C03DA01", "reorder_level": 100},
+        {"sku": "ISDN5", "generic_name": "Isosorbide dinitrate", "strength": "5 mg", "dosage_form": "sublingual tablet", "unit": "tablet", "category": "หัวใจและความดันโลหิต", "atc_code": "C01DA08", "reorder_level": 100},
+        {"sku": "ASA81", "generic_name": "Aspirin", "strength": "81 mg", "dosage_form": "tablet", "unit": "tablet", "category": "หัวใจและความดันโลหิต", "atc_code": "B01AC06", "reorder_level": 300},
+        {"sku": "CLOP75", "generic_name": "Clopidogrel", "strength": "75 mg", "dosage_form": "tablet", "unit": "tablet", "category": "หัวใจและความดันโลหิต", "atc_code": "B01AC04", "reorder_level": 100},
+        {"sku": "WARF3", "generic_name": "Warfarin", "strength": "3 mg", "dosage_form": "tablet", "unit": "tablet", "category": "หัวใจและความดันโลหิต", "atc_code": "B01AA03", "reorder_level": 60},
+        {"sku": "METF500", "generic_name": "Metformin", "strength": "500 mg", "dosage_form": "tablet", "unit": "tablet", "category": "เบาหวาน", "atc_code": "A10BA02", "reorder_level": 500},
+        {"sku": "METF850", "generic_name": "Metformin", "strength": "850 mg", "dosage_form": "tablet", "unit": "tablet", "category": "เบาหวาน", "atc_code": "A10BA02", "reorder_level": 300},
+        {"sku": "GLIP5", "generic_name": "Glipizide", "strength": "5 mg", "dosage_form": "tablet", "unit": "tablet", "category": "เบาหวาน", "atc_code": "A10BB07", "reorder_level": 200},
+        {"sku": "GLIC80", "generic_name": "Gliclazide", "strength": "80 mg", "dosage_form": "tablet", "unit": "tablet", "category": "เบาหวาน", "atc_code": "A10BB09", "reorder_level": 200},
+        {"sku": "GLIB5", "generic_name": "Glibenclamide", "strength": "5 mg", "dosage_form": "tablet", "unit": "tablet", "category": "เบาหวาน", "atc_code": "A10BB01", "reorder_level": 200},
+        {"sku": "SIMVA20", "generic_name": "Simvastatin", "strength": "20 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ไขมันในเลือด", "atc_code": "C10AA01", "reorder_level": 300},
+        {"sku": "ATOR20", "generic_name": "Atorvastatin", "strength": "20 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ไขมันในเลือด", "atc_code": "C10AA05", "reorder_level": 200},
+        {"sku": "ROSU10", "generic_name": "Rosuvastatin", "strength": "10 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ไขมันในเลือด", "atc_code": "C10AA07", "reorder_level": 100},
+        {"sku": "GEMF600", "generic_name": "Gemfibrozil", "strength": "600 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ไขมันในเลือด", "atc_code": "C10AB04", "reorder_level": 100},
+        {"sku": "OMEP20", "generic_name": "Omeprazole", "strength": "20 mg", "dosage_form": "capsule", "unit": "capsule", "category": "ทางเดินอาหาร", "atc_code": "A02BC01", "reorder_level": 300},
+        {"sku": "PANTO40", "generic_name": "Pantoprazole", "strength": "40 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ทางเดินอาหาร", "atc_code": "A02BC02", "reorder_level": 100},
+        {"sku": "FAMO20", "generic_name": "Famotidine", "strength": "20 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ทางเดินอาหาร", "atc_code": "A02BA03", "reorder_level": 100},
+        {"sku": "SIMET80", "generic_name": "Simethicone", "strength": "80 mg", "dosage_form": "chewable tablet", "unit": "tablet", "category": "ทางเดินอาหาร", "atc_code": "A03AX13", "reorder_level": 100},
+        {"sku": "DOMP10", "generic_name": "Domperidone", "strength": "10 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ทางเดินอาหาร", "atc_code": "A03FA03", "reorder_level": 200},
+        {"sku": "METOC10", "generic_name": "Metoclopramide", "strength": "10 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ทางเดินอาหาร", "atc_code": "A03FA01", "reorder_level": 100},
+        {"sku": "HYOS10", "generic_name": "Hyoscine butylbromide", "strength": "10 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ทางเดินอาหาร", "atc_code": "A03BB01", "reorder_level": 100},
+        {"sku": "LOPE2", "generic_name": "Loperamide", "strength": "2 mg", "dosage_form": "capsule", "unit": "capsule", "category": "ทางเดินอาหาร", "atc_code": "A07DA03", "reorder_level": 100},
+        {"sku": "CHAR250", "generic_name": "Activated charcoal", "strength": "250 mg", "dosage_form": "capsule", "unit": "capsule", "category": "ทางเดินอาหาร", "atc_code": "A07BA01", "reorder_level": 100},
+        {"sku": "BISA5", "generic_name": "Bisacodyl", "strength": "5 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ทางเดินอาหาร", "atc_code": "A06AB02", "reorder_level": 100},
+        {"sku": "SENNA75", "generic_name": "Sennosides", "strength": "7.5 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ทางเดินอาหาร", "atc_code": "A06AB06", "reorder_level": 100},
+        {"sku": "LACTU-S", "generic_name": "Lactulose", "strength": "10 g/15 mL, 60 mL", "dosage_form": "oral solution", "unit": "bottle", "category": "ทางเดินอาหาร", "atc_code": "A06AD11", "reorder_level": 10},
+        {"sku": "CETI10", "generic_name": "Cetirizine", "strength": "10 mg", "dosage_form": "tablet", "unit": "tablet", "category": "แก้แพ้", "atc_code": "R06AE07", "reorder_level": 300},
+        {"sku": "LORA10", "generic_name": "Loratadine", "strength": "10 mg", "dosage_form": "tablet", "unit": "tablet", "category": "แก้แพ้", "atc_code": "R06AX13", "reorder_level": 300},
+        {"sku": "CPM4", "generic_name": "Chlorpheniramine", "strength": "4 mg", "dosage_form": "tablet", "unit": "tablet", "category": "แก้แพ้", "atc_code": "R06AB04", "reorder_level": 500},
+        {"sku": "FEXO180", "generic_name": "Fexofenadine", "strength": "180 mg", "dosage_form": "tablet", "unit": "tablet", "category": "แก้แพ้", "atc_code": "R06AX26", "reorder_level": 100},
+        {"sku": "HYDROX10", "generic_name": "Hydroxyzine", "strength": "10 mg", "dosage_form": "tablet", "unit": "tablet", "category": "แก้แพ้", "atc_code": "N05BB01", "reorder_level": 100},
+        {"sku": "SALB-INH", "generic_name": "Salbutamol", "strength": "100 mcg/dose, 200 doses", "dosage_form": "inhaler", "unit": "inhaler", "category": "ทางเดินหายใจ", "atc_code": "R03AC02", "reorder_level": 10},
+        {"sku": "BUDE-INH", "generic_name": "Budesonide", "strength": "200 mcg/dose, 200 doses", "dosage_form": "inhaler", "unit": "inhaler", "category": "ทางเดินหายใจ", "atc_code": "R03BA02", "reorder_level": 5},
+        {"sku": "MONT10", "generic_name": "Montelukast", "strength": "10 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ทางเดินหายใจ", "atc_code": "R03DC03", "reorder_level": 60},
+        {"sku": "DEXTRO-S", "generic_name": "Dextromethorphan", "strength": "15 mg/5 mL, 60 mL", "dosage_form": "syrup", "unit": "bottle", "category": "ทางเดินหายใจ", "atc_code": "R05DA09", "reorder_level": 20},
+        {"sku": "BROM8", "generic_name": "Bromhexine", "strength": "8 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ทางเดินหายใจ", "atc_code": "R05CB02", "reorder_level": 200},
+        {"sku": "AMBRO30", "generic_name": "Ambroxol", "strength": "30 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ทางเดินหายใจ", "atc_code": "R05CB06", "reorder_level": 200},
+        {"sku": "GUAI-S", "generic_name": "Guaifenesin", "strength": "100 mg/5 mL, 60 mL", "dosage_form": "syrup", "unit": "bottle", "category": "ทางเดินหายใจ", "atc_code": "R05CA03", "reorder_level": 10},
+        {"sku": "NAC200", "generic_name": "Acetylcysteine", "strength": "200 mg", "dosage_form": "powder for oral solution", "unit": "sachet", "category": "ทางเดินหายใจ", "atc_code": "R05CB01", "reorder_level": 100},
+        {"sku": "FLUTI-NS", "generic_name": "Fluticasone propionate", "strength": "50 mcg/spray, 120 sprays", "dosage_form": "nasal spray", "unit": "bottle", "category": "ทางเดินหายใจ", "atc_code": "R01AD08", "reorder_level": 5},
+        {"sku": "HC1-C", "generic_name": "Hydrocortisone", "strength": "1%, 15 g", "dosage_form": "cream", "unit": "tube", "category": "ผิวหนัง", "atc_code": "D07AA02", "reorder_level": 10},
+        {"sku": "BETA-C", "generic_name": "Betamethasone valerate", "strength": "0.1%, 15 g", "dosage_form": "cream", "unit": "tube", "category": "ผิวหนัง", "atc_code": "D07AC01", "reorder_level": 10},
+        {"sku": "TA-C", "generic_name": "Triamcinolone acetonide", "strength": "0.1%, 15 g", "dosage_form": "cream", "unit": "tube", "category": "ผิวหนัง", "atc_code": "D07AB09", "reorder_level": 10},
+        {"sku": "MUPI-O", "generic_name": "Mupirocin", "strength": "2%, 15 g", "dosage_form": "ointment", "unit": "tube", "category": "ผิวหนัง", "atc_code": "D06AX09", "reorder_level": 10},
+        {"sku": "PVP-I", "generic_name": "Povidone-iodine", "strength": "10%, 30 mL", "dosage_form": "solution", "unit": "bottle", "category": "ผิวหนัง", "atc_code": "D08AG02", "reorder_level": 20},
+        {"sku": "CAP-ED", "generic_name": "Chloramphenicol", "strength": "0.5%, 10 mL", "dosage_form": "eye drops", "unit": "bottle", "category": "ตาและหู", "atc_code": "S01AA01", "reorder_level": 10},
+        {"sku": "TOBRA-ED", "generic_name": "Tobramycin", "strength": "0.3%, 5 mL", "dosage_form": "eye drops", "unit": "bottle", "category": "ตาและหู", "atc_code": "S01AA12", "reorder_level": 5},
+        {"sku": "OFLO-EAR", "generic_name": "Ofloxacin", "strength": "0.3%, 5 mL", "dosage_form": "ear drops", "unit": "bottle", "category": "ตาและหู", "atc_code": "S02AA16", "reorder_level": 5},
+        {"sku": "VITC500", "generic_name": "Ascorbic acid", "strength": "500 mg", "dosage_form": "tablet", "unit": "tablet", "category": "วิตามินและเกลือแร่", "atc_code": "A11GA01", "reorder_level": 300},
+        {"sku": "FOLIC5", "generic_name": "Folic acid", "strength": "5 mg", "dosage_form": "tablet", "unit": "tablet", "category": "วิตามินและเกลือแร่", "atc_code": "B03BB01", "reorder_level": 200},
+        {"sku": "FESO4", "generic_name": "Ferrous sulfate", "strength": "200 mg", "dosage_form": "tablet", "unit": "tablet", "category": "วิตามินและเกลือแร่", "atc_code": "B03AA07", "reorder_level": 300},
+        {"sku": "CACO3", "generic_name": "Calcium carbonate", "strength": "1,250 mg", "dosage_form": "tablet", "unit": "tablet", "category": "วิตามินและเกลือแร่", "atc_code": "A12AA04", "reorder_level": 200},
+        {"sku": "VITB1", "generic_name": "Thiamine", "strength": "100 mg", "dosage_form": "tablet", "unit": "tablet", "category": "วิตามินและเกลือแร่", "atc_code": "A11DA01", "reorder_level": 200},
+        {"sku": "AMIT10", "generic_name": "Amitriptyline", "strength": "10 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ระบบประสาท", "atc_code": "N06AA09", "reorder_level": 100},
+        {"sku": "FLUN5", "generic_name": "Flunarizine", "strength": "5 mg", "dosage_form": "capsule", "unit": "capsule", "category": "ระบบประสาท", "atc_code": "N07CA03", "reorder_level": 100},
+        {"sku": "BETAH6", "generic_name": "Betahistine", "strength": "6 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ระบบประสาท", "atc_code": "N07CA01", "reorder_level": 100},
+        {"sku": "GABA300", "generic_name": "Gabapentin", "strength": "300 mg", "dosage_form": "capsule", "unit": "capsule", "category": "ระบบประสาท", "atc_code": "N02BF01", "reorder_level": 100},
+        {"sku": "FLUOX20", "generic_name": "Fluoxetine", "strength": "20 mg", "dosage_form": "capsule", "unit": "capsule", "category": "ระบบประสาท", "atc_code": "N06AB03", "reorder_level": 60},
+        {"sku": "SERT50", "generic_name": "Sertraline", "strength": "50 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ระบบประสาท", "atc_code": "N06AB06", "reorder_level": 60},
+        {"sku": "METHO500", "generic_name": "Methocarbamol", "strength": "500 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ข้อและกล้ามเนื้อ", "atc_code": "M03BA03", "reorder_level": 100},
+        {"sku": "ORPH-P", "generic_name": "Orphenadrine/Paracetamol", "strength": "35/450 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ข้อและกล้ามเนื้อ", "atc_code": "M03BC51", "reorder_level": 100},
+        {"sku": "COLCH06", "generic_name": "Colchicine", "strength": "0.6 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ข้อและกล้ามเนื้อ", "atc_code": "M04AC01", "reorder_level": 60},
+        {"sku": "ALLO100", "generic_name": "Allopurinol", "strength": "100 mg", "dosage_form": "tablet", "unit": "tablet", "category": "ข้อและกล้ามเนื้อ", "atc_code": "M04AA01", "reorder_level": 200}
+      ]
+    };
+
+    // =========================================================================
+    // 2. WHO ATC REFERENCE DICTIONARIES (Level 1 & Level 3 Pharmacological Groups)
+    // =========================================================================
+    const ATC_LEVEL1_META = {
+      A: { nameTh: "ระบบทางเดินอาหารและเมแทบอลิซึม", nameEn: "Alimentary tract & metabolism", color: "#0d9488" },
+      B: { nameTh: "เลือดและอวัยวะสร้างเลือด", nameEn: "Blood & blood forming organs", color: "#e11d48" },
+      C: { nameTh: "ระบบหัวใจและหลอดเลือด", nameEn: "Cardiovascular system", color: "#2563eb" },
+      D: { nameTh: "ยาโรคผิวหนัง", nameEn: "Dermatologicals", color: "#d97706" },
+      G: { nameTh: "ระบบทางเดินปัสสาวะและฮอร์โมนเพศ", nameEn: "Genito-urinary & sex hormones", color: "#db2777" },
+      H: { nameTh: "ฮอร์โมนสำหรับใช้ทั่วร่างกาย", nameEn: "Systemic hormonal preparations", color: "#9333ea" },
+      J: { nameTh: "ยาต้านการติดเชื้อสำหรับใช้ทั่วร่างกาย", nameEn: "Antiinfectives for systemic use", color: "#4f46e5" },
+      L: { nameTh: "ยาต้านมะเร็งและปรับภูมิคุ้มกัน", nameEn: "Antineoplastic & immunomodulating", color: "#475569" },
+      M: { nameTh: "ระบบกล้ามเนื้อและโครงกระดูก", nameEn: "Musculo-skeletal system", color: "#ea580c" },
+      N: { nameTh: "ระบบประสาท", nameEn: "Nervous system", color: "#7c3aed" },
+      P: { nameTh: "ยาต้านปรสิตและยาฆ่าแมลง", nameEn: "Antiparasitic products", color: "#059669" },
+      R: { nameTh: "ระบบทางเดินหายใจ", nameEn: "Respiratory system", color: "#0284c7" },
+      S: { nameTh: "อวัยวะรับความรู้สึก (ตาและหู)", nameEn: "Sensory organs", color: "#0891b2" },
+      V: { nameTh: "กลุ่มเบ็ดเตล็ดอื่นๆ", nameEn: "Various", color: "#64748b" },
+    };
+
+    const ATC_LEVEL3_META = {
+      A02: "ยารักษาโรคที่เกี่ยวกับกรดในกระเพาะ (Drugs for acid related disorders)",
+      A03: "ยารักษาความผิดปกติของทางเดินอาหารส่วนต้น (Drugs for functional GI disorders)",
+      A06: "ยาระบาย (Drugs for constipation)",
+      A07: "ยาแก้ท้องเสียและต้านการติดเชื้อในลำไส้ (Antidiarrheals, intestinal anti-infectives)",
+      A10: "ยารักษาโรคเบาหวาน (Drugs used in diabetes)",
+      A11: "วิตามิน (Vitamins)",
+      A12: "แร่ธาตุเสริม (Mineral supplements)",
+      B01: "ยาต้านการแข็งตัวของเลือดและต้านเกล็ดเลือด (Antithrombotic agents)",
+      B03: "ยาบำรุงเลือดและรักษาภาวะโลหิตจาง (Antianemic preparations)",
+      C01: "ยารักษาโรคหัวใจและหลอดเลือดหัวใจ (Cardiac therapy)",
+      C03: "ยาขับปัสสาวะ (Diuretics)",
+      C07: "ยากลุ่มเบต้าบล็อกเกอร์ (Beta blocking agents)",
+      C08: "ยากลุ่มแคลเซียมแชนแนลบล็อกเกอร์ (Calcium channel blockers)",
+      C09: "ยาออกฤทธิ์ต่อระบบเรนิน-แองจิโอเทนซิน (Agents acting on renin-angiotensin system)",
+      C10: "ยาลดไขมันในเลือด (Lipid modifying agents)",
+      D01: "ยาต้านเชื้อราสำหรับผิวหนัง (Antifungals for dermatological use)",
+      D06: "ยาปฏิชีวนะและต้านไวรัสเฉพาะที่ (Antibiotics & chemotherapeutics for dermatological use)",
+      D07: "ยาสเตียรอยด์ทาผิวหนัง (Corticosteroids, dermatological preparations)",
+      D08: "ยาฆ่าเชื้อและทำลายเชื้อเฉพาะที่ (Antiseptics and disinfectants)",
+      J01: "ยาต้านแบคทีเรียสำหรับใช้ทั่วร่างกาย (Antibacterials for systemic use)",
+      J02: "ยาต้านเชื้อราสำหรับใช้ทั่วร่างกาย (Antimycotics for systemic use)",
+      J05: "ยาต้านไวรัสสำหรับใช้ทั่วร่างกาย (Antivirals for systemic use)",
+      M01: "ยาต้านการอักเสบและแก้ปวดข้อ (Antiinflammatory & antirheumatic products)",
+      M02: "ยาทาแก้ปวดข้อและกล้ามเนื้อเฉพาะที่ (Topical products for joint & muscular pain)",
+      M03: "ยาคลายกล้ามเนื้อ (Muscle relaxants)",
+      M04: "ยารักษาโรคเกาต์ (Antigout preparations)",
+      N02: "ยาแก้ปวด (Analgesics)",
+      N05: "ยาระงับประสาทและคลายกังวล (Psycholeptics)",
+      N06: "ยาต้านเศร้าและกระตุ้นประสาท (Psychoanaleptics)",
+      N07: "ยาระบบประสาทอื่นๆ / แก้เวียนศีรษะ (Other nervous system drugs)",
+      P01: "ยาต้านโปรโตซัว (Antiprotozoals)",
+      P02: "ยาถ่ายพยาธิ (Anthelmintics)",
+      R01: "ยาพ่นจมูก (Nasal preparations)",
+      R03: "ยารักษาโรคทางเดินหายใจอุดกั้น/หอบหืด (Drugs for obstructive airway diseases)",
+      R05: "ยาแก้ไอและละลายเสมหะ (Cough and cold preparations)",
+      R06: "ยาต้านฮีสตามีน/แก้แพ้ (Antihistamines for systemic use)",
+      S01: "ยารักษาโรคตา (Ophthalmologicals)",
+      S02: "ยารักษาโรคหู (Otologicals)",
+    };
+
+    // =========================================================================
+    // 3. GLOBAL STATE & CHART INSTANCE REGISTRY
+    // =========================================================================
+    let currentData = JSON.parse(JSON.stringify(DEFAULT_DRUGS_DATA));
+    let activeMode = 'inventory'; // 'inventory' | 'clinical' | 'executive'
+    let chartInstances = {};
+
+    // Mode-specific interactive state
+    let mode1State = {
+      selectedUnit: 'tablet',
+      topBottomView: 'top10', // 'top10' | 'lowest'
+      search: '',
+      categoryFilter: 'ALL',
+      unitFilter: 'ALL',
+    };
+
+    let mode2State = {
+      selectedAtcLevel1: 'A',
+      search: '',
+      atcFilter: 'ALL',
+    };
+
+    let mode3State = {
+      watchlistFilter: 'ALL', // 'ALL' | '5' | '10'
+      heatmapSelectedCell: null, // { category, groupKey, items }
+    };
+
+    // =========================================================================
+    // 4. UTILITY FUNCTIONS (TOASTS, CHART CLEANUP, FORMATTING)
+    // =========================================================================
+    let toastTimer = null;
+    function showToast(title, message, type = 'info') {
+      const banner = document.getElementById('toastBanner');
+      const content = document.getElementById('toastContent');
+      const icon = document.getElementById('toastIcon');
+      const titleEl = document.getElementById('toastTitle');
+      const msgEl = document.getElementById('toastMessage');
+
+      const styles = {
+        success: { border: 'border-emerald-200 bg-emerald-50/95', icon: '✅' },
+        error: { border: 'border-rose-200 bg-rose-50/95', icon: '⚠️' },
+        info: { border: 'border-teal-200 bg-white', icon: 'ℹ️' },
+      };
+      const cfg = styles[type] || styles.info;
+
+      content.className = `flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg ${cfg.border}`;
+      icon.textContent = cfg.icon;
+      titleEl.textContent = title;
+      msgEl.textContent = message;
+
+      banner.classList.remove('hidden');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(hideToast, 4500);
+    }
+
+    function hideToast() {
+      document.getElementById('toastBanner').classList.add('hidden');
+    }
+
+    function destroyAllCharts() {
+      Object.keys(chartInstances).forEach((key) => {
+        if (chartInstances[key]) {
+          chartInstances[key].destroy();
+          delete chartInstances[key];
+        }
+      });
+    }
+
+    function formatNumber(num) {
+      return Number(num).toLocaleString('en-US');
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Set global Chart.js typography defaults
+    Chart.defaults.font.family = "'Noto Sans Thai', system-ui, sans-serif";
+    Chart.defaults.color = document.body.classList.contains('dark-mode') ? '#b3b3b3' : '#475569';
+
+    // =========================================================================
+    // 5. JSON UPLOAD & METADATA INITIALIZATION
+    // =========================================================================
+    document.getElementById('jsonFileInput').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          if (!parsed || !Array.isArray(parsed.items) || parsed.items.length === 0) {
+            throw new Error('โครงสร้างไฟล์ไม่ถูกต้อง: ต้องมีคีย์ "items" ที่เป็นรายการยา');
+          }
+          // Validate basic item fields
+          const sample = parsed.items[0];
+          const requiredKeys = ['sku', 'generic_name', 'strength', 'dosage_form', 'unit', 'category', 'atc_code', 'reorder_level'];
+          const missing = requiredKeys.filter((k) => !(k in sample));
+          if (missing.length > 0) {
+            throw new Error(`ขาดฟิลด์สำคัญในรายการยา: ${missing.join(', ')}`);
+          }
+
+          // Build meta fallback if missing
+          const categories = (parsed.meta && Array.isArray(parsed.meta.categories))
+            ? parsed.meta.categories
+            : [...new Set(parsed.items.map((i) => i.category))];
+
+          currentData = {
+            meta: {
+              title: (parsed.meta && parsed.meta.title) || file.name,
+              note: (parsed.meta && parsed.meta.note) || 'นำเข้าข้อมูลจากไฟล์ภายนอก',
+              categories,
+              count: parsed.items.length,
+            },
+            items: parsed.items,
+          };
+
+          // Reset filters to safe defaults for new data
+          const units = [...new Set(currentData.items.map((i) => i.unit))];
+          mode1State.selectedUnit = units.includes('tablet') ? 'tablet' : units[0];
+          mode1State.search = '';
+          mode1State.categoryFilter = 'ALL';
+          mode1State.unitFilter = 'ALL';
+
+          const atcL1s = [...new Set(currentData.items.map((i) => (i.atc_code || '').charAt(0).toUpperCase()))].filter(Boolean);
+          mode2State.selectedAtcLevel1 = atcL1s.includes('A') ? 'A' : (atcL1s[0] || 'A');
+          mode2State.search = '';
+          mode2State.atcFilter = 'ALL';
+
+          mode3State.watchlistFilter = 'ALL';
+          mode3State.heatmapSelectedCell = null;
+
+          updateHeaderMeta();
+          document.getElementById('resetDefaultBtn').classList.remove('hidden');
+          renderActiveMode();
+          showToast('โหลดไฟล์สำเร็จ', `นำเข้าข้อมูล "${currentData.meta.title}" จำนวน ${currentData.items.length} รายการเรียบร้อยแล้ว`, 'success');
+        } catch (err) {
+          showToast('ไม่สามารถอ่านไฟล์ JSON ได้', err.message, 'error');
+        } finally {
+          e.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    function resetToDefaultData() {
+      currentData = JSON.parse(JSON.stringify(DEFAULT_DRUGS_DATA));
+      mode1State = { selectedUnit: 'tablet', topBottomView: 'top10', search: '', categoryFilter: 'ALL', unitFilter: 'ALL' };
+      mode2State = { selectedAtcLevel1: 'A', search: '', atcFilter: 'ALL' };
+      mode3State = { watchlistFilter: 'ALL', heatmapSelectedCell: null };
+      updateHeaderMeta();
+      document.getElementById('resetDefaultBtn').classList.add('hidden');
+      renderActiveMode();
+      showToast('รีเซ็ตข้อมูลเรียบร้อย', 'กลับมาแสดงข้อมูลบัญชีรายการยาเริ่มต้น 100 รายการ', 'info');
+    }
+
+    function updateHeaderMeta() {
+      const { meta, items } = currentData;
+      const catCount = meta.categories ? meta.categories.length : new Set(items.map((i) => i.category)).size;
+      document.getElementById('metaTitle').textContent = meta.title || 'บัญชีรายการยาของร้านยาจำลอง';
+      document.getElementById('metaNote').textContent = meta.note || '';
+      document.getElementById('metaCountBadge').textContent = `${formatNumber(items.length)} รายการ (SKUs)`;
+      document.getElementById('metaCatBadge').textContent = `${catCount} หมวดหมู่`;
+      document.getElementById('footerSummary').textContent = `Dataset: ${items.length} SKUs • ${catCount} Categories`;
+    }
+
+    function toggleDarkMode() {
+      const enabled = document.body.classList.toggle('dark-mode');
+      const button = document.getElementById('darkModeToggle');
+      document.getElementById('darkModeIcon').textContent = enabled ? '☀️' : '🌙';
+      document.getElementById('darkModeLabel').textContent = enabled ? 'โหมดสว่าง' : 'โหมดมืด';
+      button.setAttribute('aria-label', enabled ? 'ปิดโหมดมืด' : 'เปิดโหมดมืด');
+      button.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+
+      updateChartTheme(enabled);
+    }
+
+    function updateChartTheme(enabled) {
+      if (typeof Chart !== 'undefined') {
+        const textColor = enabled ? '#b3b3b3' : '#64748b';
+        const gridColor = enabled ? '#414141' : '#f1f5f9';
+        Chart.defaults.color = textColor;
+
+        Object.values(chartInstances).forEach((chart) => {
+          chart.options.color = textColor;
+          if (chart.options.scales) {
+            Object.values(chart.options.scales).forEach((scale) => {
+              if (scale.ticks) scale.ticks.color = textColor;
+              if (scale.grid) scale.grid.color = gridColor;
+            });
+          }
+          if (chart.options.plugins) {
+            const legend = chart.options.plugins.legend;
+            if (legend && typeof legend === 'object' && legend.labels) {
+              legend.labels.color = textColor;
+            }
+            const tooltip = chart.options.plugins.tooltip;
+            if (tooltip && typeof tooltip === 'object') {
+              tooltip.backgroundColor = enabled ? '#161616' : '#fff';
+              tooltip.titleColor = enabled ? '#ffffff' : '#111827';
+              tooltip.bodyColor = enabled ? '#b3b3b3' : '#374151';
+              tooltip.borderColor = enabled ? '#414141' : '#e5e7eb';
+              tooltip.borderWidth = 1;
+            }
+          }
+          chart.update();
+        });
+      }
+    }
+
+    // =========================================================================
+    // 6. MODE SWITCHER CONTROLLER
+    // =========================================================================
+    function switchMode(mode) {
+      if (activeMode === mode && document.getElementById('dashboardContainer').innerHTML.trim() !== '') {
+        return;
+      }
+      activeMode = mode;
+
+      // Update tab button styles
+      const tabStyles = {
+        inventory: 'bg-white text-teal-800 shadow-sm ring-1 ring-teal-200',
+        clinical: 'bg-white text-indigo-800 shadow-sm ring-1 ring-indigo-200',
+        executive: 'bg-white text-emerald-800 shadow-sm ring-1 ring-emerald-200',
+      };
+      const inactiveStyle = 'text-slate-600 hover:text-slate-900 hover:bg-white/60';
+
+      ['inventory', 'clinical', 'executive'].forEach((m) => {
+        const btn = document.getElementById(`tab-${m}`);
+        const isSelected = m === mode;
+        btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        btn.className = `mode-tab flex items-center justify-center sm:justify-start gap-2.5 rounded-xl px-4 py-2.5 text-left transition-all duration-200 cursor-pointer ${
+          isSelected ? tabStyles[m] : inactiveStyle
+        }`;
+      });
+
+      renderActiveMode();
+    }
+
+    function renderActiveMode() {
+      destroyAllCharts();
+      const container = document.getElementById('dashboardContainer');
+      container.innerHTML = '';
+
+      if (activeMode === 'inventory') {
+        renderMode1Inventory(container);
+      } else if (activeMode === 'clinical') {
+        renderMode2Clinical(container);
+      } else if (activeMode === 'executive') {
+        renderMode3Executive(container);
+      }
+
+      updateChartTheme(document.body.classList.contains('dark-mode'));
+    }
+
+    // =========================================================================
+    // 7. MODE 1: INVENTORY & REORDER POLICY (คลังยาและจุดสั่งซื้อ)
+    // =========================================================================
+    function renderMode1Inventory(container) {
+      const items = currentData.items;
+      const categories = currentData.meta.categories || [...new Set(items.map((i) => i.category))];
+
+      // Compute KPIs
+      const totalSkus = items.length;
+      const sumByUnit = {};
+      items.forEach((item) => {
+        sumByUnit[item.unit] = (sumByUnit[item.unit] || 0) + Number(item.reorder_level || 0);
+      });
+
+      const tabletSum = sumByUnit['tablet'] || 0;
+      const capsuleSum = sumByUnit['capsule'] || 0;
+      const oralSolidUnitsTotal = tabletSum + capsuleSum;
+
+      const bottleSum = sumByUnit['bottle'] || 0;
+      const tubeSum = sumByUnit['tube'] || 0;
+      const bottleTubeTotal = bottleSum + tubeSum;
+
+      // Top category by SKU count
+      const catCounts = {};
+      items.forEach((i) => {
+        catCounts[i.category] = (catCounts[i.category] || 0) + 1;
+      });
+      const sortedCats = Object.entries(catCounts).sort((a, b) => b[1] - a[1]);
+      const topCategoryName = sortedCats[0] ? sortedCats[0][0] : '-';
+      const topCategoryCount = sortedCats[0] ? sortedCats[0][1] : 0;
+
+      // Fast-moving items (reorder_level === 500 or max reorder level)
+      const maxReorder = Math.max(...items.map((i) => Number(i.reorder_level || 0)));
+      const fastMovingItems = items.filter((i) => Number(i.reorder_level) === maxReorder);
+
+      const allUnits = [...new Set(items.map((i) => i.unit))];
+
+      container.innerHTML = `
+        <div class="mode-panel-animate space-y-6">
+          <!-- Mode Context Banner -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-teal-50/70 border border-teal-200/80 rounded-2xl px-4 py-3">
+            <div class="flex items-center gap-2.5">
+              <span class="inline-flex h-2.5 w-2.5 rounded-full bg-teal-500"></span>
+              <span class="text-sm font-semibold text-teal-900">โหมดที่ 1: การบริหารคลังยาและนโยบายจุดสั่งซื้อ (Inventory & Reorder Policy)</span>
+            </div>
+            <span class="text-xs text-teal-700">วิเคราะห์แยกตามหน่วยนับ (Unit) เพื่อป้องกันการบวกรวมหน่วยต่างประเภท</span>
+          </div>
+
+          <!-- 5 KPI Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <!-- KPI 1 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">รายการยาทั้งหมด</span>
+                <span class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center text-sm font-bold">SKU</span>
+              </div>
+              <div class="my-2">
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900">${formatNumber(totalSkus)} <span class="text-sm font-medium text-slate-500">รายการ</span></div>
+              </div>
+              <div class="text-xs text-slate-500">ครอบคลุม ${allUnits.length} หน่วยนับคลังสินค้า</div>
+            </div>
+
+            <!-- KPI 2 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500">เกณฑ์สั่งซื้อเม็ด/แคปซูล</span>
+                <span class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-sm">💊</span>
+              </div>
+              <div class="my-2">
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900">${formatNumber(oralSolidUnitsTotal)} <span class="text-sm font-medium text-slate-500">หน่วย</span></div>
+              </div>
+              <div class="text-xs text-slate-600 font-mono bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
+                ${formatNumber(tabletSum)} tablet + ${formatNumber(capsuleSum)} capsule
+              </div>
+            </div>
+
+            <!-- KPI 3 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500">เกณฑ์สั่งซื้อขวดและหลอด</span>
+                <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm">🧴</span>
+              </div>
+              <div class="my-2">
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900">${formatNumber(bottleTubeTotal)} <span class="text-sm font-medium text-slate-500">หน่วย</span></div>
+              </div>
+              <div class="text-xs text-slate-600 font-mono bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
+                ${formatNumber(bottleSum)} bottle + ${formatNumber(tubeSum)} tube
+              </div>
+            </div>
+
+            <!-- KPI 4 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500">หมวดหมู่รายการมากสุด</span>
+                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm">🏆</span>
+              </div>
+              <div class="my-2">
+                <div class="text-base sm:text-lg font-bold text-slate-900 leading-snug">${escapeHtml(topCategoryName)}</div>
+              </div>
+              <div class="text-xs font-semibold text-emerald-700">${topCategoryCount} รายการ (${((topCategoryCount / totalSkus) * 100).toFixed(0)}% ของคลัง)</div>
+            </div>
+
+            <!-- KPI 5 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500">หมุนเวียนเร็วสุด (Reorder = ${maxReorder})</span>
+                <span class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-sm">⚡</span>
+              </div>
+              <div class="my-2">
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900">${fastMovingItems.length} <span class="text-sm font-medium text-slate-500">รายการ</span></div>
+              </div>
+              <div class="text-[11px] font-mono font-semibold text-rose-700 truncate" title="${fastMovingItems.map((i) => i.sku).join(', ')}">
+                ${fastMovingItems.map((i) => i.sku).join(', ')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row 1: Unit-Filtered Reorder Sum + Top 10 vs Lowest Reorder -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Chart 1: Horizontal Bar Chart by Category (Filtered by Unit) -->
+            <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                  <h2 class="text-base font-bold text-slate-900">ผลรวมจุดสั่งซื้อ (Reorder Level) แยกตามหมวดหมู่</h2>
+                  <p class="text-xs text-slate-500 mt-0.5">เลือกกรองตามหน่วยนับเพื่อเปรียบเทียบปริมาณสำรองขั้นต่ำอย่างแม่นยำ</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <label for="m1UnitSelect" class="text-xs font-semibold text-slate-600">หน่วยนับ:</label>
+                  <select id="m1UnitSelect" class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-1.5 text-xs font-mono font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    ${allUnits.map((u) => `<option value="${escapeHtml(u)}" ${u === mode1State.selectedUnit ? 'selected' : ''}>${escapeHtml(u)} (${items.filter((i) => i.unit === u).length} SKUs)</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+              <div class="relative flex-1 min-h-[340px]">
+                <canvas id="m1CategoryUnitChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 2: Top 10 Highest vs Lowest Reorder Items -->
+            <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                  <h2 id="m1TopBottomTitle" class="text-base font-bold text-slate-900">10 อันดับยาที่ตั้งจุดสั่งซื้อสูงสุด</h2>
+                  <p id="m1TopBottomSubtitle" class="text-xs text-slate-500 mt-0.5">กลุ่มยาพื้นฐานอัตราหมุนเวียนสูง (หน่วยเม็ด/แคปซูล)</p>
+                </div>
+                <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 shrink-0">
+                  <button type="button" id="btnTop10" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                    mode1State.topBottomView === 'top10' ? 'bg-white text-teal-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                  }">Top 10 สูงสุด</button>
+                  <button type="button" id="btnLowest" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                    mode1State.topBottomView === 'lowest' ? 'bg-white text-amber-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                  }">เกณฑ์ต่ำ ≤ 10</button>
+                </div>
+              </div>
+              <div class="relative flex-1 min-h-[340px]">
+                <canvas id="m1TopBottomChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 3: 100% Stacked Bar Chart of Unit Proportions per Category -->
+          <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">สัดส่วนหน่วยนับคลังสินค้า (Unit Mix 100%) ภายในแต่ละหมวดหมู่</h2>
+                <p class="text-xs text-slate-500 mt-0.5">ช่วยให้ฝ่ายคลังวางแผนชั้นวางและพื้นที่จัดเก็บแยกตามลักษณะบรรจุภัณฑ์ (เม็ด, แคปซูล, ขวด, หลอด, ยาพ่น, ซอง)</p>
+              </div>
+            </div>
+            <div class="relative h-[320px] w-full">
+              <canvas id="m1StackedUnitChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Interactive Stock Policy Table -->
+          <div class="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div class="p-5 border-b border-slate-200/80 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">ตารางนโยบายจุดสั่งซื้อขั้นต่ำ (Interactive Stock Policy Table)</h2>
+                <p class="text-xs text-slate-500 mt-0.5">แถบสีแสดงสัดส่วน Reorder Level เทียบกับค่าสูงสุดในหน่วยนับเดียวกัน</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2.5">
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="m1SearchInput"
+                    value="${escapeHtml(mode1State.search)}"
+                    placeholder="ค้นหา SKU หรือชื่อสามัญ..."
+                    class="w-56 sm:w-64 rounded-xl border border-slate-300 bg-slate-50 pl-3.5 pr-8 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  <span class="absolute right-2.5 top-2 text-slate-400 text-xs">🔍</span>
+                </div>
+                <select id="m1CatFilter" class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                  <option value="ALL">ทุกหมวดหมู่ (${categories.length})</option>
+                  ${categories.map((c) => `<option value="${escapeHtml(c)}" ${mode1State.categoryFilter === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+                </select>
+                <select id="m1TableUnitFilter" class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                  <option value="ALL">ทุกหน่วยนับ (${allUnits.length})</option>
+                  ${allUnits.map((u) => `<option value="${escapeHtml(u)}" ${mode1State.unitFilter === u ? 'selected' : ''}>${escapeHtml(u)}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-[440px]">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 sticky top-0 z-10 border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500 tracking-wider">
+                  <tr>
+                    <th class="py-3 px-4">SKU</th>
+                    <th class="py-3 px-4">ชื่อสามัญ (Generic Name)</th>
+                    <th class="py-3 px-4">ความแรง</th>
+                    <th class="py-3 px-4">รูปแบบ</th>
+                    <th class="py-3 px-4">หมวดหมู่</th>
+                    <th class="py-3 px-4">หน่วยนับ</th>
+                    <th class="py-3 px-4 min-w-[200px]">จุดสั่งซื้อ (Reorder Level)</th>
+                  </tr>
+                </thead>
+                <tbody id="m1TableBody" class="divide-y divide-slate-100 text-xs text-slate-700">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+            <div id="m1TableFooter" class="bg-slate-50 px-5 py-2.5 border-t border-slate-200/80 text-xs text-slate-500 flex justify-between items-center"></div>
+          </div>
+        </div>
+      `;
+
+      // Bind Mode 1 Events
+      document.getElementById('m1UnitSelect').addEventListener('change', (e) => {
+        mode1State.selectedUnit = e.target.value;
+        renderMode1CategoryUnitChart();
+      });
+
+      document.getElementById('btnTop10').addEventListener('click', () => {
+        mode1State.topBottomView = 'top10';
+        document.getElementById('btnTop10').className = 'px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer bg-white text-teal-700 shadow-xs';
+        document.getElementById('btnLowest').className = 'px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer text-slate-600 hover:text-slate-900';
+        renderMode1TopBottomChart();
+      });
+
+      document.getElementById('btnLowest').addEventListener('click', () => {
+        mode1State.topBottomView = 'lowest';
+        document.getElementById('btnLowest').className = 'px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer bg-white text-amber-700 shadow-xs';
+        document.getElementById('btnTop10').className = 'px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer text-slate-600 hover:text-slate-900';
+        renderMode1TopBottomChart();
+      });
+
+      document.getElementById('m1SearchInput').addEventListener('input', (e) => {
+        mode1State.search = e.target.value;
+        renderMode1Table();
+      });
+      document.getElementById('m1CatFilter').addEventListener('change', (e) => {
+        mode1State.categoryFilter = e.target.value;
+        renderMode1Table();
+      });
+      document.getElementById('m1TableUnitFilter').addEventListener('change', (e) => {
+        mode1State.unitFilter = e.target.value;
+        renderMode1Table();
+      });
+
+      // Render Mode 1 Charts & Table
+      renderMode1CategoryUnitChart();
+      renderMode1TopBottomChart();
+      renderMode1StackedUnitChart();
+      renderMode1Table();
+    }
+
+    function renderMode1CategoryUnitChart() {
+      if (chartInstances.m1CategoryUnit) {
+        chartInstances.m1CategoryUnit.destroy();
+      }
+      const ctx = document.getElementById('m1CategoryUnitChart').getContext('2d');
+      const unit = mode1State.selectedUnit;
+      const items = currentData.items.filter((i) => i.unit === unit);
+
+      const catSums = {};
+      const catItemCounts = {};
+      items.forEach((i) => {
+        catSums[i.category] = (catSums[i.category] || 0) + Number(i.reorder_level || 0);
+        catItemCounts[i.category] = (catItemCounts[i.category] || 0) + 1;
+      });
+
+      const sorted = Object.entries(catSums).sort((a, b) => b[1] - a[1]);
+      const labels = sorted.map((d) => d[0]);
+      const values = sorted.map((d) => d[1]);
+
+      chartInstances.m1CategoryUnit = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: `ผลรวมจุดสั่งซื้อ (${unit})`,
+              data: values,
+              backgroundColor: 'rgba(13, 148, 136, 0.85)',
+              hoverBackgroundColor: 'rgba(15, 118, 110, 1)',
+              borderRadius: 6,
+              barPercentage: 0.72,
+            },
+          ],
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const cat = context.label;
+                  const val = context.parsed.x;
+                  const count = catItemCounts[cat] || 0;
+                  return ` รวม ${formatNumber(val)} ${unit} (จาก ${count} รายการ)`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              grid: { color: '#f1f5f9' },
+              title: { display: true, text: `จำนวนรวม (${unit})`, font: { size: 11, weight: 'bold' } },
+            },
+            y: {
+              grid: { display: false },
+              ticks: { font: { size: 11 } },
+            },
+          },
+        },
+      });
+    }
+
+    function renderMode1TopBottomChart() {
+      if (chartInstances.m1TopBottom) {
+        chartInstances.m1TopBottom.destroy();
+      }
+      const ctx = document.getElementById('m1TopBottomChart').getContext('2d');
+      const isTop10 = mode1State.topBottomView === 'top10';
+
+      const titleEl = document.getElementById('m1TopBottomTitle');
+      const subEl = document.getElementById('m1TopBottomSubtitle');
+
+      let subset = [];
+      if (isTop10) {
+        titleEl.textContent = '10 อันดับยาที่ตั้งจุดสั่งซื้อสูงสุด';
+        subEl.textContent = 'กลุ่มยาพื้นฐานอัตราหมุนเวียนสูง (300 - 500 หน่วย)';
+        subset = [...currentData.items]
+          .sort((a, b) => b.reorder_level - a.reorder_level)
+          .slice(0, 10);
+      } else {
+        subset = [...currentData.items]
+          .filter((i) => Number(i.reorder_level) <= 10)
+          .sort((a, b) => a.reorder_level - b.reorder_level || a.sku.localeCompare(b.sku));
+        titleEl.textContent = `กลุ่มตั้งจุดสั่งซื้อต่ำสุด ≤ 10 หน่วย (${subset.length} รายการ)`;
+        subEl.textContent = 'กลุ่มยาขวด ยาพ่น ยาหยอดตา/หู และยาทาเฉพาะที่';
+      }
+
+      const labels = subset.map((i) => `${i.sku} (${i.generic_name})`);
+      const values = subset.map((i) => i.reorder_level);
+
+      chartInstances.m1TopBottom = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Reorder Level',
+              data: values,
+              backgroundColor: subset.map((i) =>
+                isTop10
+                  ? (i.reorder_level >= 500 ? '#e11d48' : '#0284c7')
+                  : (i.reorder_level <= 5 ? '#d97706' : '#0d9488')
+              ),
+              borderRadius: 5,
+              barPercentage: 0.72,
+            },
+          ],
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const item = subset[ctx.dataIndex];
+                  return ` จุดสั่งซื้อ: ${formatNumber(item.reorder_level)} ${item.unit} (${item.dosage_form})`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              grid: { color: '#f1f5f9' },
+              suggestedMax: isTop10 ? 550 : 12,
+            },
+            y: {
+              grid: { display: false },
+              ticks: { font: { size: 10.5 } },
+            },
+          },
+        },
+      });
+    }
+
+    function renderMode1StackedUnitChart() {
+      if (chartInstances.m1StackedUnit) {
+        chartInstances.m1StackedUnit.destroy();
+      }
+      const ctx = document.getElementById('m1StackedUnitChart').getContext('2d');
+      const categories = currentData.meta.categories || [...new Set(currentData.items.map((i) => i.category))];
+      const units = ['tablet', 'capsule', 'bottle', 'tube', 'inhaler', 'sachet'];
+      const unitColors = {
+        tablet: '#0d9488',
+        capsule: '#0284c7',
+        bottle: '#f59e0b',
+        tube: '#ec4899',
+        inhaler: '#6366f1',
+        sachet: '#8b5cf6',
+      };
+
+      // Include any extra units if user uploaded a custom file
+      const allFoundUnits = [...new Set(currentData.items.map((i) => i.unit))];
+      allFoundUnits.forEach((u) => {
+        if (!units.includes(u)) units.push(u);
+      });
+
+      const catTotals = {};
+      categories.forEach((c) => {
+        catTotals[c] = currentData.items.filter((i) => i.category === c).length || 1;
+      });
+
+      const datasets = units.map((u) => ({
+        label: u,
+        data: categories.map((c) => {
+          const count = currentData.items.filter((i) => i.category === c && i.unit === u).length;
+          return Number(((count / catTotals[c]) * 100).toFixed(1));
+        }),
+        rawCounts: categories.map((c) => currentData.items.filter((i) => i.category === c && i.unit === u).length),
+        backgroundColor: unitColors[u] || '#64748b',
+        borderWidth: 1,
+        borderColor: '#ffffff',
+      }));
+
+      chartInstances.m1StackedUnit = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: categories,
+          datasets,
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { usePointStyle: true, boxWidth: 8, font: { family: "'JetBrains Mono', monospace", size: 11 } },
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const raw = ctx.dataset.rawCounts[ctx.dataIndex];
+                  if (raw === 0) return null;
+                  return ` ${ctx.dataset.label}: ${raw} รายการ (${ctx.parsed.x}%)`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              stacked: true,
+              min: 0,
+              max: 100,
+              ticks: { callback: (v) => `${v}%` },
+              grid: { color: '#f1f5f9' },
+            },
+            y: {
+              stacked: true,
+              grid: { display: false },
+              ticks: { font: { size: 11 } },
+            },
+          },
+        },
+      });
+    }
+
+    function renderMode1Table() {
+      const items = currentData.items;
+      const q = mode1State.search.trim().toLowerCase();
+
+      // Calculate max reorder level per unit for visual progress bars
+      const maxPerUnit = {};
+      items.forEach((i) => {
+        maxPerUnit[i.unit] = Math.max(maxPerUnit[i.unit] || 0, Number(i.reorder_level || 0));
+      });
+
+      const filtered = items.filter((item) => {
+        const matchSearch =
+          !q ||
+          item.sku.toLowerCase().includes(q) ||
+          item.generic_name.toLowerCase().includes(q);
+        const matchCat = mode1State.categoryFilter === 'ALL' || item.category === mode1State.categoryFilter;
+        const matchUnit = mode1State.unitFilter === 'ALL' || item.unit === mode1State.unitFilter;
+        return matchSearch && matchCat && matchUnit;
+      });
+
+      const tbody = document.getElementById('m1TableBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400">ไม่พบรายการยาที่ตรงกับเงื่อนไขการค้นหา</td></tr>`;
+      } else {
+        tbody.innerHTML = filtered
+          .map((item) => {
+            const unitMax = maxPerUnit[item.unit] || 1;
+            const pct = Math.min(100, Math.round((item.reorder_level / unitMax) * 100));
+            const barColor =
+              item.reorder_level >= 300
+                ? 'bg-teal-600'
+                : item.reorder_level <= 10
+                ? 'bg-amber-500'
+                : 'bg-sky-500';
+
+            return `
+              <tr class="hover:bg-slate-50/90 transition-colors">
+                <td class="py-2.5 px-4 font-mono font-semibold text-teal-800 whitespace-nowrap">${escapeHtml(item.sku)}</td>
+                <td class="py-2.5 px-4 font-medium text-slate-900">${escapeHtml(item.generic_name)}</td>
+                <td class="py-2.5 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(item.strength)}</td>
+                <td class="py-2.5 px-4">
+                  <span class="inline-block rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">${escapeHtml(item.dosage_form)}</span>
+                </td>
+                <td class="py-2.5 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(item.category)}</td>
+                <td class="py-2.5 px-4 font-mono text-[11px] text-slate-600">${escapeHtml(item.unit)}</td>
+                <td class="py-2.5 px-4">
+                  <div class="flex items-center gap-2.5">
+                    <span class="font-mono font-bold text-slate-900 w-10 text-right">${formatNumber(item.reorder_level)}</span>
+                    <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden min-w-[80px]">
+                      <div class="${barColor} h-full rounded-full" style="width: ${pct}%"></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            `;
+          })
+          .join('');
+      }
+
+      document.getElementById('m1TableFooter').innerHTML = `
+        <span>แสดง ${filtered.length} จากทั้งหมด ${items.length} รายการ</span>
+        <span class="text-[11px]">เกณฑ์สี: <span class="text-teal-700 font-semibold">● ≥300</span> | <span class="text-sky-600 font-semibold">● 20–200</span> | <span class="text-amber-600 font-semibold">● ≤10 (เฝ้าระวัง)</span></span>
+      `;
+    }
+
+    // =========================================================================
+    // 8. MODE 2: CLINICAL & WHO ATC FOCUS (เภสัชวิทยาและรหัส ATC)
+    // =========================================================================
+    function renderMode2Clinical(container) {
+      const items = currentData.items;
+      const categories = currentData.meta.categories || [...new Set(items.map((i) => i.category))];
+
+      // Compute KPIs
+      const genericGroups = {};
+      items.forEach((i) => {
+        if (!genericGroups[i.generic_name]) genericGroups[i.generic_name] = [];
+        genericGroups[i.generic_name].push(i);
+      });
+      const uniqueGenericsCount = Object.keys(genericGroups).length;
+
+      const atcLevel1Groups = {};
+      items.forEach((i) => {
+        const l1 = (i.atc_code || '?').charAt(0).toUpperCase();
+        if (!atcLevel1Groups[l1]) atcLevel1Groups[l1] = [];
+        atcLevel1Groups[l1].push(i);
+      });
+      const atcLevel1Letters = Object.keys(atcLevel1Groups).sort(
+        (a, b) => atcLevel1Groups[b].length - atcLevel1Groups[a].length
+      );
+
+      // Multi-form / Multi-strength generic drugs (>1 SKU)
+      const multiFormGenerics = Object.entries(genericGroups)
+        .filter(([, list]) => list.length > 1)
+        .sort((a, b) => a[0].localeCompare(b[0]));
+
+      container.innerHTML = `
+        <div class="mode-panel-animate space-y-6">
+          <!-- Mode Context Banner -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-indigo-50/70 border border-indigo-200/80 rounded-2xl px-4 py-3">
+            <div class="flex items-center gap-2.5">
+              <span class="inline-flex h-2.5 w-2.5 rounded-full bg-indigo-500"></span>
+              <span class="text-sm font-semibold text-indigo-950">โหมดที่ 2: โครงสร้างทางเภสัชวิทยาและรหัสมาตรฐานสากล WHO ATC</span>
+            </div>
+            <span class="text-xs text-indigo-700">คลิกที่แท่งกราฟกลุ่ม ATC Level 1 เพื่อเจาะดูกลุ่มย่อยระดับเภสัชวิทยา (Level 3)</span>
+          </div>
+
+          <!-- 4 KPI Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- KPI 1 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500">จำนวนตัวยาสามัญ (Unique Generics)</span>
+                <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">🧬</span>
+              </div>
+              <div class="my-2">
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900">${uniqueGenericsCount} <span class="text-sm font-medium text-slate-500">ชนิด</span></div>
+              </div>
+              <div class="text-xs text-slate-500">จากรายการยาทั้งหมด ${items.length} SKUs</div>
+            </div>
+
+            <!-- KPI 2 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500">กลุ่มระบบอวัยวะ ATC (Level 1)</span>
+                <span class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center text-xs font-mono font-bold">ATC</span>
+              </div>
+              <div class="my-2">
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900">${atcLevel1Letters.length} <span class="text-sm font-medium text-slate-500">กลุ่มหลัก</span></div>
+              </div>
+              <div class="text-xs text-slate-600 font-mono">
+                มากสุด: กลุ่ม ${atcLevel1Letters[0]} (${atcLevel1Groups[atcLevel1Letters[0]].length} SKUs)
+              </div>
+            </div>
+
+            <!-- KPI 3 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500">หมวดหมู่การรักษาของร้าน</span>
+                <span class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-sm">🗂️</span>
+              </div>
+              <div class="my-2">
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900">${categories.length} <span class="text-sm font-medium text-slate-500">หมวดหมู่</span></div>
+              </div>
+              <div class="text-xs text-slate-500">จัดกลุ่มตามอาการและระบบการจ่ายยาหน้าร้าน</div>
+            </div>
+
+            <!-- KPI 4 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500">ยาที่มีหลายรูปแบบ / ความแรง</span>
+                <span class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-sm">🔄</span>
+              </div>
+              <div class="my-2">
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900">${multiFormGenerics.length} <span class="text-sm font-medium text-slate-500">ชนิด</span></div>
+              </div>
+              <div class="text-[11px] text-purple-800 font-medium truncate" title="${multiFormGenerics.map((g) => g[0]).join(', ')}">
+                ${multiFormGenerics.map((g) => g[0]).join(', ')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 1: WHO ATC Level 1 Distribution + Interactive Level 3 Drill-Down -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left: ATC Level 1 Bar Chart -->
+            <div class="lg:col-span-6 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col">
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <div>
+                  <h2 class="text-base font-bold text-slate-900">การกระจายตัวตามกลุ่มหลัก WHO ATC (Level 1)</h2>
+                  <p class="text-xs text-slate-500 mt-0.5">คลิกที่แท่งกราฟเพื่อดูกลุ่มย่อยทางเภสัชวิทยา (Level 3) ทางด้านขวา</p>
+                </div>
+              </div>
+              <div class="relative flex-1 min-h-[340px]">
+                <canvas id="m2AtcLevel1Chart"></canvas>
+              </div>
+            </div>
+
+            <!-- Right: Interactive ATC Level 3 Subgroup Drill-down Panel -->
+            <div class="lg:col-span-6 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                <div>
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">ATC Level 3 Subgroup Drill-Down</span>
+                  <h3 id="m2DrilldownHeader" class="text-base font-bold text-slate-900 mt-0.5"></h3>
+                </div>
+                <select id="m2AtcL1Select" class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  ${atcLevel1Letters
+                    .map((l) => {
+                      const info = ATC_LEVEL1_META[l] || { nameTh: 'กลุ่มอื่นๆ' };
+                      return `<option value="${l}" ${l === mode2State.selectedAtcLevel1 ? 'selected' : ''}>กลุ่ม ${l}: ${info.nameTh} (${atcLevel1Groups[l].length})</option>`;
+                    })
+                    .join('')}
+                </select>
+              </div>
+              <div id="m2DrilldownContent" class="mt-3 space-y-3 overflow-y-auto max-h-[340px] pr-1">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Category vs ATC Level 1 Cross-Mapping -->
+          <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">ความเชื่อมโยงระหว่าง "หมวดหมู่ของร้าน (Category)" กับ "กลุ่มรหัส ATC (Level 1)"</h2>
+                <p class="text-xs text-slate-500 mt-0.5">แสดงให้เห็นหมวดหมู่ที่ครอบคลุมหลายระบบอวัยวะ (เช่น หมวดต้านเชื้อรา ไวรัส และพยาธิ ครอบคลุมถึง 4 กลุ่ม ATC: P, J, D, A)</p>
+              </div>
+            </div>
+            <div class="relative h-[330px] w-full">
+              <canvas id="m2CategoryAtcStackedChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Section 3: 6 Multi-Form / Multi-Strength Drug Comparison Grid -->
+          <div class="space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">เปรียบเทียบตัวยาสามัญที่มีหลายรูปแบบหรือความแรง (${multiFormGenerics.length} ชนิด)</h2>
+                <p class="text-xs text-slate-500">เปรียบเทียบขนาดความแรง รูปแบบยา หน่วยนับ และนโยบายจุดสั่งซื้อของตัวยาเดียวกัน</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              ${multiFormGenerics
+                .map(([genericName, skus]) => {
+                  const first = skus[0];
+                  const l1 = first.atc_code.charAt(0);
+                  const badgeColor = ATC_LEVEL1_META[l1] ? ATC_LEVEL1_META[l1].color : '#4f46e5';
+                  return `
+                    <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs hover:border-indigo-300 transition">
+                      <div class="flex items-start justify-between gap-2 pb-2.5 border-b border-slate-100">
+                        <div>
+                          <h3 class="text-sm font-bold text-slate-900">${escapeHtml(genericName)}</h3>
+                          <span class="text-[11px] text-slate-500">${escapeHtml(first.category)}</span>
+                        </div>
+                        <span class="font-mono text-[11px] font-bold px-2 py-0.5 rounded-md text-white" style="background-color: ${badgeColor}">
+                          ${skus.length} รูปแบบ/ขนาด
+                        </span>
+                      </div>
+                      <div class="mt-2.5 space-y-2">
+                        ${skus
+                          .map(
+                            (s) => `
+                          <div class="rounded-xl bg-slate-50 border border-slate-200/70 p-2.5 text-xs">
+                            <div class="flex items-center justify-between">
+                              <span class="font-mono font-bold text-indigo-700">${escapeHtml(s.sku)}</span>
+                              <span class="font-mono text-[11px] text-slate-500 bg-white px-1.5 py-0.5 rounded border border-slate-200">${escapeHtml(s.atc_code)}</span>
+                            </div>
+                            <div class="mt-1 flex flex-wrap items-center justify-between gap-1 text-slate-700">
+                              <span class="font-medium">${escapeHtml(s.strength)}</span>
+                              <span class="text-[11px] bg-indigo-50 text-indigo-800 px-2 py-0.5 rounded-full font-medium">${escapeHtml(s.dosage_form)}</span>
+                            </div>
+                            <div class="mt-1.5 pt-1.5 border-t border-slate-200/60 flex justify-between text-[11px] text-slate-500">
+                              <span>หน่วย: <strong class="font-mono text-slate-700">${escapeHtml(s.unit)}</strong></span>
+                              <span>Reorder: <strong class="font-mono text-slate-900">${formatNumber(s.reorder_level)}</strong></span>
+                            </div>
+                          </div>
+                        `
+                          )
+                          .join('')}
+                      </div>
+                    </div>
+                  `;
+                })
+                .join('')}
+            </div>
+          </div>
+
+          <!-- Section 4: Pharmacopoeia Reference Table (Sorted by ATC Code) -->
+          <div class="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div class="p-5 border-b border-slate-200/80 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">ตารางอ้างอิงเภสัชตำรับเรียงตามรหัส WHO ATC (Pharmacopoeia Reference)</h2>
+                <p class="text-xs text-slate-500 mt-0.5">ค้นหาตามรหัส ATC ชื่อสามัญทางยา หรือหมวดหมู่การรักษา</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2.5">
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="m2SearchInput"
+                    value="${escapeHtml(mode2State.search)}"
+                    placeholder="ค้นหารหัส ATC, ชื่อยา, SKU..."
+                    class="w-56 sm:w-64 rounded-xl border border-slate-300 bg-slate-50 pl-3.5 pr-8 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <span class="absolute right-2.5 top-2 text-slate-400 text-xs">🔍</span>
+                </div>
+                <select id="m2AtcFilterSelect" class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="ALL">ทุกกลุ่ม ATC Level 1 (${atcLevel1Letters.length})</option>
+                  ${atcLevel1Letters
+                    .map((l) => {
+                      const info = ATC_LEVEL1_META[l] || { nameTh: 'อื่นๆ' };
+                      return `<option value="${l}" ${mode2State.atcFilter === l ? 'selected' : ''}>กลุ่ม ${l} — ${info.nameTh}</option>`;
+                    })
+                    .join('')}
+                </select>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-[440px]">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 sticky top-0 z-10 border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500 tracking-wider">
+                  <tr>
+                    <th class="py-3 px-4">รหัส ATC</th>
+                    <th class="py-3 px-4">กลุ่มระบบอวัยวะ (ATC Level 1)</th>
+                    <th class="py-3 px-4">SKU</th>
+                    <th class="py-3 px-4">ชื่อสามัญ (Generic Name)</th>
+                    <th class="py-3 px-4">ความแรง</th>
+                    <th class="py-3 px-4">รูปแบบยา</th>
+                    <th class="py-3 px-4">หมวดหมู่ร้าน</th>
+                  </tr>
+                </thead>
+                <tbody id="m2TableBody" class="divide-y divide-slate-100 text-xs text-slate-700">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+            <div id="m2TableFooter" class="bg-slate-50 px-5 py-2.5 border-t border-slate-200/80 text-xs text-slate-500"></div>
+          </div>
+        </div>
+      `;
+
+      // Bind Mode 2 Events
+      document.getElementById('m2AtcL1Select').addEventListener('change', (e) => {
+        mode2State.selectedAtcLevel1 = e.target.value;
+        renderMode2Drilldown();
+      });
+
+      document.getElementById('m2SearchInput').addEventListener('input', (e) => {
+        mode2State.search = e.target.value;
+        renderMode2Table();
+      });
+
+      document.getElementById('m2AtcFilterSelect').addEventListener('change', (e) => {
+        mode2State.atcFilter = e.target.value;
+        renderMode2Table();
+      });
+
+      renderMode2AtcLevel1Chart();
+      renderMode2Drilldown();
+      renderMode2CategoryAtcStackedChart();
+      renderMode2Table();
+    }
+
+    function renderMode2AtcLevel1Chart() {
+      if (chartInstances.m2AtcL1) {
+        chartInstances.m2AtcL1.destroy();
+      }
+      const ctx = document.getElementById('m2AtcLevel1Chart').getContext('2d');
+      const items = currentData.items;
+
+      const counts = {};
+      items.forEach((i) => {
+        const l1 = (i.atc_code || '?').charAt(0).toUpperCase();
+        counts[l1] = (counts[l1] || 0) + 1;
+      });
+
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      const letters = sorted.map((d) => d[0]);
+      const labels = letters.map((l) => {
+        const meta = ATC_LEVEL1_META[l] || { nameTh: 'อื่นๆ' };
+        return `${l} — ${meta.nameTh}`;
+      });
+      const values = sorted.map((d) => d[1]);
+      const colors = letters.map((l) => (ATC_LEVEL1_META[l] ? ATC_LEVEL1_META[l].color : '#6366f1'));
+
+      chartInstances.m2AtcL1 = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'จำนวนรายการยา (SKUs)',
+              data: values,
+              backgroundColor: colors,
+              borderRadius: 6,
+              barPercentage: 0.72,
+            },
+          ],
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          onClick: (_, elements) => {
+            if (elements && elements.length > 0) {
+              const idx = elements[0].index;
+              const clickedLetter = letters[idx];
+              mode2State.selectedAtcLevel1 = clickedLetter;
+              const selectEl = document.getElementById('m2AtcL1Select');
+              if (selectEl) selectEl.value = clickedLetter;
+              renderMode2Drilldown();
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                afterLabel: (ctx) => {
+                  const l = letters[ctx.dataIndex];
+                  const meta = ATC_LEVEL1_META[l];
+                  return meta ? `(${meta.nameEn})\nคลิกเพื่อดูกลุ่มย่อย Level 3` : '';
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              grid: { color: '#f1f5f9' },
+              title: { display: true, text: 'จำนวนรายการยา (SKUs)', font: { size: 11, weight: 'bold' } },
+            },
+            y: {
+              grid: { display: false },
+              ticks: { font: { size: 11 } },
+            },
+          },
+        },
+      });
+    }
+
+    function renderMode2Drilldown() {
+      const l1 = mode2State.selectedAtcLevel1;
+      const meta = ATC_LEVEL1_META[l1] || { nameTh: 'กลุ่มอื่นๆ', nameEn: 'Other', color: '#4f46e5' };
+      const matching = currentData.items.filter((i) => (i.atc_code || '').toUpperCase().startsWith(l1));
+
+      document.getElementById('m2DrilldownHeader').innerHTML = `
+        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md text-white font-mono text-xs mr-1.5" style="background-color:${meta.color}">${l1}</span>
+        ${escapeHtml(meta.nameTh)} <span class="text-xs font-normal text-slate-500">(${matching.length} รายการ)</span>
+      `;
+
+      // Group by ATC Level 3 (first 3 chars, e.g., A02, A10)
+      const level3Groups = {};
+      matching.forEach((item) => {
+        const l3 = item.atc_code.substring(0, 3).toUpperCase();
+        if (!level3Groups[l3]) level3Groups[l3] = [];
+        level3Groups[l3].push(item);
+      });
+
+      const contentEl = document.getElementById('m2DrilldownContent');
+      contentEl.innerHTML = Object.entries(level3Groups)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([l3Code, drugs]) => {
+          const desc = ATC_LEVEL3_META[l3Code] || `กลุ่มย่อยทางเภสัชวิทยา ${l3Code}`;
+          return `
+            <div class="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <span class="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-md">${escapeHtml(l3Code)}</span>
+                  <span class="text-xs font-semibold text-slate-800 ml-1.5">${escapeHtml(desc)}</span>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-500 shrink-0">${drugs.length} SKUs</span>
+              </div>
+              <div class="mt-2 flex flex-wrap gap-1.5">
+                ${drugs
+                  .map(
+                    (d) => `
+                  <span class="inline-flex items-center gap-1.5 rounded-lg bg-white border border-slate-200 px-2.5 py-1 text-[11px] text-slate-700 shadow-2xs">
+                    <strong class="font-mono text-slate-900">${escapeHtml(d.atc_code)}</strong>
+                    <span>${escapeHtml(d.generic_name)}</span>
+                    <span class="text-slate-400">(${escapeHtml(d.strength)})</span>
+                  </span>
+                `
+                  )
+                  .join('')}
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function renderMode2CategoryAtcStackedChart() {
+      if (chartInstances.m2CatAtc) {
+        chartInstances.m2CatAtc.destroy();
+      }
+      const ctx = document.getElementById('m2CategoryAtcStackedChart').getContext('2d');
+      const categories = currentData.meta.categories || [...new Set(currentData.items.map((i) => i.category))];
+      const letters = [...new Set(currentData.items.map((i) => (i.atc_code || '?').charAt(0).toUpperCase()))].sort();
+
+      const datasets = letters.map((l) => {
+        const meta = ATC_LEVEL1_META[l] || { nameTh: l, color: '#64748b' };
+        return {
+          label: `${l} (${meta.nameTh})`,
+          data: categories.map((c) => currentData.items.filter((i) => i.category === c && i.atc_code.startsWith(l)).length),
+          backgroundColor: meta.color,
+          borderWidth: 1,
+          borderColor: '#ffffff',
+        };
+      });
+
+      chartInstances.m2CatAtc = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: categories,
+          datasets,
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { usePointStyle: true, boxWidth: 8, font: { size: 10.5 } },
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const val = ctx.parsed.x;
+                  if (!val) return null;
+                  return ` กลุ่ม ${ctx.dataset.label}: ${val} รายการ`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              stacked: true,
+              beginAtZero: true,
+              grid: { color: '#f1f5f9' },
+              title: { display: true, text: 'จำนวนรายการยา (SKUs)', font: { size: 11, weight: 'bold' } },
+            },
+            y: {
+              stacked: true,
+              grid: { display: false },
+              ticks: { font: { size: 11 } },
+            },
+          },
+        },
+      });
+    }
+
+    function renderMode2Table() {
+      const items = [...currentData.items].sort((a, b) => a.atc_code.localeCompare(b.atc_code));
+      const q = mode2State.search.trim().toLowerCase();
+
+      const filtered = items.filter((item) => {
+        const matchSearch =
+          !q ||
+          item.atc_code.toLowerCase().includes(q) ||
+          item.generic_name.toLowerCase().includes(q) ||
+          item.sku.toLowerCase().includes(q) ||
+          item.category.toLowerCase().includes(q);
+        const matchAtc = mode2State.atcFilter === 'ALL' || item.atc_code.toUpperCase().startsWith(mode2State.atcFilter);
+        return matchSearch && matchAtc;
+      });
+
+      const formBadgeStyle = (form) => {
+        if (form.includes('tablet')) return 'bg-teal-50 text-teal-800 border-teal-200';
+        if (form.includes('capsule')) return 'bg-sky-50 text-sky-800 border-sky-200';
+        if (form.includes('cream') || form.includes('gel') || form.includes('ointment')) return 'bg-pink-50 text-pink-800 border-pink-200';
+        if (form.includes('syrup') || form.includes('suspension') || form.includes('solution')) return 'bg-amber-50 text-amber-800 border-amber-200';
+        return 'bg-purple-50 text-purple-800 border-purple-200';
+      };
+
+      const tbody = document.getElementById('m2TableBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400">ไม่พบข้อมูลยาที่ตรงกับรหัส ATC หรือคำค้นหา</td></tr>`;
+      } else {
+        tbody.innerHTML = filtered
+          .map((item) => {
+            const l1 = item.atc_code.charAt(0).toUpperCase();
+            const meta = ATC_LEVEL1_META[l1] || { nameTh: 'อื่นๆ', color: '#64748b' };
+            return `
+              <tr class="hover:bg-slate-50/90 transition-colors">
+                <td class="py-2.5 px-4 font-mono font-bold text-indigo-700 whitespace-nowrap">${escapeHtml(item.atc_code)}</td>
+                <td class="py-2.5 px-4 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-700">
+                    <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color:${meta.color}"></span>
+                    ${escapeHtml(meta.nameTh)}
+                  </span>
+                </td>
+                <td class="py-2.5 px-4 font-mono text-slate-600 whitespace-nowrap">${escapeHtml(item.sku)}</td>
+                <td class="py-2.5 px-4 font-semibold text-slate-900">${escapeHtml(item.generic_name)}</td>
+                <td class="py-2.5 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(item.strength)}</td>
+                <td class="py-2.5 px-4 whitespace-nowrap">
+                  <span class="inline-block rounded-md border px-2 py-0.5 text-[11px] font-medium ${formBadgeStyle(item.dosage_form)}">
+                    ${escapeHtml(item.dosage_form)}
+                  </span>
+                </td>
+                <td class="py-2.5 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(item.category)}</td>
+              </tr>
+            `;
+          })
+          .join('');
+      }
+
+      document.getElementById('m2TableFooter').textContent = `แสดง ${filtered.length} จากทั้งหมด ${items.length} รายการ (เรียงตามลำดับรหัส WHO ATC)`;
+    }
+
+    // =========================================================================
+    // 9. MODE 3: EXECUTIVE & ASSORTMENT OVERVIEW (ภาพรวมธุรกิจและหมวดหมู่)
+    // =========================================================================
+    function renderMode3Executive(container) {
+      const items = currentData.items;
+      const categories = currentData.meta.categories || [...new Set(items.map((i) => i.category))];
+      const totalItems = items.length;
+
+      // Oral Solids definition: tablet, capsule, sublingual tablet, chewable tablet
+      const oralSolidForms = ['tablet', 'capsule', 'sublingual tablet', 'chewable tablet'];
+      const oralSolidCount = items.filter((i) => oralSolidForms.includes(i.dosage_form.toLowerCase())).length;
+      const nonOralSolidCount = totalItems - oralSolidCount;
+      const oralSolidPct = Math.round((oralSolidCount / totalItems) * 100);
+      const nonOralSolidPct = 100 - oralSolidPct;
+
+      // Dosage Form Diversity
+      const distinctForms = [...new Set(items.map((i) => i.dosage_form))];
+
+      // Core Chronic NCDs: หัวใจและความดันโลหิต, เบาหวาน, ไขมันในเลือด
+      const ncdCategories = ['หัวใจและความดันโลหิต', 'เบาหวาน', 'ไขมันในเลือด'];
+      const ncdItems = items.filter((i) => ncdCategories.includes(i.category));
+      const ncdPct = Math.round((ncdItems.length / totalItems) * 100);
+
+      // Low-reorder watchlist (reorder_level <= 10)
+      const lowReorderItems = items.filter((i) => Number(i.reorder_level) <= 10);
+
+      container.innerHTML = `
+        <div class="mode-panel-animate space-y-6">
+          <!-- Mode Context Banner -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl px-4 py-3">
+            <div class="flex items-center gap-2.5">
+              <span class="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-sm font-semibold text-emerald-950">โหมดที่ 3: ภาพรวมธุรกิจและโครงสร้างความหลากหลายของสินค้า (Executive & Assortment)</span>
+            </div>
+            <span class="text-xs text-emerald-700">ภาพรวมสัดส่วนยาโรคเรื้อรัง (NCDs) รูปแบบยาหน้าร้าน และรายการเฝ้าระวังสต็อก</span>
+          </div>
+
+          <!-- 5 KPI Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <!-- KPI 1 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500">รายการยาทั้งหมด</span>
+                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-bold">ALL</span>
+              </div>
+              <div class="my-2">
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900">${formatNumber(totalItems)} <span class="text-sm font-medium text-slate-500">SKUs</span></div>
+              </div>
+              <div class="text-xs text-slate-500">ครอบคลุม ${categories.length} หมวดหมู่การรักษา</div>
+            </div>
+
+            <!-- KPI 2 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500">ยารับประทานชนิดแข็ง</span>
+                <span class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center text-sm">💊</span>
+              </div>
+              <div class="my-2">
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900">${oralSolidPct}% <span class="text-sm font-medium text-slate-500">(${oralSolidCount} รายการ)</span></div>
+              </div>
+              <div class="text-[11px] text-slate-500">Tablet, Capsule, Sublingual, Chewable</div>
+            </div>
+
+            <!-- KPI 3 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500">ยาน้ำ ยาใช้ภายนอก และเฉพาะทาง</span>
+                <span class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-sm">💧</span>
+              </div>
+              <div class="my-2">
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900">${nonOralSolidPct}% <span class="text-sm font-medium text-slate-500">(${nonOralSolidCount} รายการ)</span></div>
+              </div>
+              <div class="text-[11px] text-slate-500">ครีม ยาน้ำ ยาพ่น ยาหยอด และยาผงละลายน้ำ</div>
+            </div>
+
+            <!-- KPI 4 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500">ความหลากหลายรูปแบบยา</span>
+                <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">🧩</span>
+              </div>
+              <div class="my-2">
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900">${distinctForms.length} <span class="text-sm font-medium text-slate-500">รูปแบบ</span></div>
+              </div>
+              <div class="text-xs text-slate-500">Dosage Forms ที่ให้บริการหน้าร้าน</div>
+            </div>
+
+            <!-- KPI 5 -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500">กลุ่มโรคเรื้อรังหลัก (NCDs)</span>
+                <span class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-sm">❤️</span>
+              </div>
+              <div class="my-2">
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900">${ncdPct}% <span class="text-sm font-medium text-slate-500">(${ncdItems.length} รายการ)</span></div>
+              </div>
+              <div class="text-[11px] text-slate-500">หัวใจ/ความดัน 13, เบาหวาน 5, ไขมัน 4</div>
+            </div>
+          </div>
+
+          <!-- Charts Row: Donut Chart (Dosage Form Mix) + Sorted Category Bar with Average Line -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Donut Chart -->
+            <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">สัดส่วนรูปแบบยา (Dosage Form Mix)</h2>
+                <p class="text-xs text-slate-500 mt-0.5">แสดง 4 รูปแบบหลัก และรวมรูปแบบเฉพาะทางอีก 14 รูปแบบ (นำเมาส์ชี้เพื่อดูรายละเอียด)</p>
+              </div>
+              <div class="relative h-[260px] my-3">
+                <canvas id="m3DonutChart"></canvas>
+              </div>
+              <div id="m3SpecialtyFormsLegend" class="mt-auto pt-3 border-t border-slate-100 text-[11px] text-slate-600">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Sorted Category Bar Chart with Average Reference Line -->
+            <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                <div>
+                  <h2 class="text-base font-bold text-slate-900">จำนวนรายการยาในแต่ละหมวดหมู่เทียบกับค่าเฉลี่ยร้าน</h2>
+                  <p class="text-xs text-slate-500 mt-0.5">เส้นประสีแดงแสดงค่าเฉลี่ย ${(totalItems / categories.length).toFixed(2)} รายการ/หมวด</p>
+                </div>
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg shrink-0">
+                  <span class="w-3 border-t-2 border-dashed border-rose-500"></span>
+                  เฉลี่ย ${(totalItems / categories.length).toFixed(2)} SKUs
+                </span>
+              </div>
+              <div class="relative flex-1 min-h-[340px]">
+                <canvas id="m3CategoryAvgChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category × Dosage Form Heatmap Matrix -->
+          <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">ตารางความหนาแน่นรูปแบบยาแยกตามหมวดหมู่ (Category × Dosage Form Heatmap)</h2>
+                <p class="text-xs text-slate-500 mt-0.5">คลิกที่ช่องตัวเลขเพื่อดูรายชื่อยาในหมวดหมู่และรูปแบบนั้นๆ</p>
+              </div>
+              <div class="flex items-center gap-1.5 text-[11px] text-slate-500">
+                <span>ความหนาแน่น:</span>
+                <span class="px-2 py-0.5 rounded bg-slate-50 border border-slate-200">0</span>
+                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-semibold">1–2</span>
+                <span class="px-2 py-0.5 rounded bg-emerald-300 text-emerald-950 font-semibold">3–5</span>
+                <span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-semibold">6+</span>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table id="m3HeatmapTable" class="w-full text-xs border-collapse">
+                <!-- Populated dynamically -->
+              </table>
+            </div>
+
+            <!-- Interactive Cell Drilldown Drawer -->
+            <div id="m3HeatmapDrilldown" class="hidden mt-4 rounded-xl bg-emerald-50/70 border border-emerald-200 p-3.5"></div>
+          </div>
+
+          <!-- Low-Reorder Watchlist Table (reorder_level <= 10) -->
+          <div class="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div class="p-5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-base shrink-0 mt-0.5">⚠️</div>
+                <div>
+                  <h2 class="text-base font-bold text-slate-900">รายการเฝ้าระวังจุดสั่งซื้อต่ำ (Low-Reorder Watchlist: ≤ 10 หน่วย)</h2>
+                  <p class="text-xs text-slate-500 mt-0.5">กลุ่มยาเฉพาะทาง ยาพ่น ยาหยอดตา/หู และยาทา ที่มีสต็อกขั้นต่ำน้อยและต้องติดตามใกล้ชิด (${lowReorderItems.length} รายการ)</p>
+                </div>
+              </div>
+              <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 shrink-0">
+                <button type="button" data-wl="ALL" class="wl-btn px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer bg-white text-slate-900 shadow-xs">ทั้งหมด (${lowReorderItems.length})</button>
+                <button type="button" data-wl="5" class="wl-btn px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer text-slate-600 hover:text-slate-900">วิกฤต = 5 (${lowReorderItems.filter((i) => i.reorder_level === 5).length})</button>
+                <button type="button" data-wl="10" class="wl-btn px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer text-slate-600 hover:text-slate-900">เฝ้าระวัง = 10 (${lowReorderItems.filter((i) => i.reorder_level === 10).length})</button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-[380px]">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 sticky top-0 z-10 border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500 tracking-wider">
+                  <tr>
+                    <th class="py-3 px-4">SKU</th>
+                    <th class="py-3 px-4">ชื่อสามัญ (Generic Name)</th>
+                    <th class="py-3 px-4">ความแรง</th>
+                    <th class="py-3 px-4">รูปแบบยา</th>
+                    <th class="py-3 px-4">หมวดหมู่</th>
+                    <th class="py-3 px-4">รหัส ATC</th>
+                    <th class="py-3 px-4 text-right">จุดสั่งซื้อ</th>
+                  </tr>
+                </thead>
+                <tbody id="m3WatchlistBody" class="divide-y divide-slate-100 text-xs text-slate-700">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Bind Watchlist filter buttons
+      document.querySelectorAll('.wl-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          mode3State.watchlistFilter = btn.getAttribute('data-wl');
+          document.querySelectorAll('.wl-btn').forEach((b) => {
+            const active = b.getAttribute('data-wl') === mode3State.watchlistFilter;
+            b.className = `wl-btn px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
+              active ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            }`;
+          });
+          renderMode3WatchlistTable();
+        });
+      });
+
+      renderMode3DonutChart();
+      renderMode3CategoryAvgChart();
+      renderMode3HeatmapMatrix();
+      renderMode3WatchlistTable();
+    }
+
+    function renderMode3DonutChart() {
+      if (chartInstances.m3Donut) {
+        chartInstances.m3Donut.destroy();
+      }
+      const ctx = document.getElementById('m3DonutChart').getContext('2d');
+      const items = currentData.items;
+
+      const formCounts = {};
+      items.forEach((i) => {
+        formCounts[i.dosage_form] = (formCounts[i.dosage_form] || 0) + 1;
+      });
+
+      const sortedForms = Object.entries(formCounts).sort((a, b) => b[1] - a[1]);
+      const top4 = sortedForms.slice(0, 4);
+      const others = sortedForms.slice(4);
+      const othersSum = others.reduce((acc, cur) => acc + cur[1], 0);
+
+      const labels = [...top4.map((d) => d[0]), `รูปแบบเฉพาะทางอื่นๆ (${others.length} รูปแบบ)`];
+      const data = [...top4.map((d) => d[1]), othersSum];
+      const colors = ['#0d9488', '#0284c7', '#ec4899', '#f59e0b', '#6366f1'];
+
+      // Render breakdown summary below donut
+      const legendEl = document.getElementById('m3SpecialtyFormsLegend');
+      legendEl.innerHTML = `
+        <div class="font-semibold text-slate-700 mb-1">รายละเอียดกลุ่มรูปแบบเฉพาะทางอื่นๆ (${othersSum} รายการ):</div>
+        <div class="flex flex-wrap gap-1.5">
+          ${others
+            .map(
+              ([form, cnt]) =>
+                `<span class="inline-block rounded bg-slate-100 px-2 py-0.5 text-[10.5px] text-slate-700">${escapeHtml(form)}: <strong>${cnt}</strong></span>`
+            )
+            .join('')}
+        </div>
+      `;
+
+      chartInstances.m3Donut = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [
+            {
+              data,
+              backgroundColor: colors,
+              borderWidth: 2,
+              borderColor: '#ffffff',
+              hoverOffset: 6,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '62%',
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { usePointStyle: true, boxWidth: 8, font: { size: 11 } },
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const val = ctx.parsed;
+                  const pct = ((val / items.length) * 100).toFixed(1);
+                  return ` ${ctx.label}: ${val} รายการ (${pct}%)`;
+                },
+                afterBody: (tooltipItems) => {
+                  if (tooltipItems[0].dataIndex === 4 && others.length > 0) {
+                    return others.map(([f, c]) => `  • ${f}: ${c}`);
+                  }
+                  return [];
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    function renderMode3CategoryAvgChart() {
+      if (chartInstances.m3CatAvg) {
+        chartInstances.m3CatAvg.destroy();
+      }
+      const ctx = document.getElementById('m3CategoryAvgChart').getContext('2d');
+      const items = currentData.items;
+      const categories = currentData.meta.categories || [...new Set(items.map((i) => i.category))];
+
+      const counts = categories.map((c) => ({
+        category: c,
+        count: items.filter((i) => i.category === c).length,
+      }));
+      counts.sort((a, b) => b.count - a.count);
+
+      const avg = items.length / categories.length;
+
+      // Custom plugin to draw vertical average dashed line on horizontal bar chart
+      const avgLinePlugin = {
+        id: 'avgReferenceLine',
+        afterDatasetsDraw(chart) {
+          const { ctx, chartArea, scales } = chart;
+          const xPos = scales.x.getPixelForValue(avg);
+          if (xPos < chartArea.left || xPos > chartArea.right) return;
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.setLineDash([5, 5]);
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#e11d48';
+          ctx.moveTo(xPos, chartArea.top);
+          ctx.lineTo(xPos, chartArea.bottom);
+          ctx.stroke();
+
+          // Label pill at top of line
+          ctx.fillStyle = '#e11d48';
+          ctx.font = "bold 10px 'Noto Sans Thai', sans-serif";
+          ctx.textAlign = 'center';
+          ctx.fillText(`Avg ${avg.toFixed(2)}`, xPos, chartArea.top - 6);
+          ctx.restore();
+        },
+      };
+
+      chartInstances.m3CatAvg = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: counts.map((d) => d.category),
+          datasets: [
+            {
+              label: 'จำนวนรายการยา (SKUs)',
+              data: counts.map((d) => d.count),
+              backgroundColor: counts.map((d) => (d.count >= avg ? 'rgba(5, 150, 105, 0.85)' : 'rgba(148, 163, 184, 0.75)')),
+              borderRadius: 6,
+              barPercentage: 0.72,
+            },
+          ],
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: { padding: { top: 18 } },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const val = ctx.parsed.x;
+                  const diff = (val - avg).toFixed(2);
+                  const sign = diff >= 0 ? '+' : '';
+                  return ` จำนวน: ${val} รายการ (${sign}${diff} เทียบค่าเฉลี่ย)`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              grid: { color: '#f1f5f9' },
+              suggestedMax: Math.max(...counts.map((c) => c.count)) + 2,
+            },
+            y: {
+              grid: { display: false },
+              ticks: { font: { size: 11 } },
+            },
+          },
+        },
+        plugins: [avgLinePlugin],
+      });
+    }
+
+    function renderMode3HeatmapMatrix() {
+      const items = currentData.items;
+      const categories = currentData.meta.categories || [...new Set(items.map((i) => i.category))];
+
+      const formGroups = [
+        { key: 'tablet', label: 'Tablet', match: (f) => f === 'tablet' },
+        { key: 'capsule', label: 'Capsule', match: (f) => f === 'capsule' },
+        { key: 'other_solid', label: 'Sublingual / Chewable / Sachet', match: (f) => ['sublingual tablet', 'chewable tablet', 'powder for oral solution'].includes(f) },
+        { key: 'topical', label: 'Cream / Ointment / Gel', match: (f) => ['cream', 'ointment', 'gel'].includes(f) },
+        { key: 'liquid', label: 'Syrup / Suspension / Solution', match: (f) => ['syrup', 'dry syrup', 'oral suspension', 'oral solution', 'solution'].includes(f) },
+        { key: 'inhale', label: 'Inhaler / Nasal Spray', match: (f) => ['inhaler', 'nasal spray'].includes(f) },
+        { key: 'drops', label: 'Eye / Ear Drops', match: (f) => ['eye drops', 'ear drops'].includes(f) },
+      ];
+
+      const cellColorClass = (count) => {
+        if (count === 0) return 'bg-slate-50/70 text-slate-300';
+        if (count <= 2) return 'bg-emerald-100/90 text-emerald-900 font-semibold hover:bg-emerald-200 cursor-pointer';
+        if (count <= 5) return 'bg-emerald-300 text-emerald-950 font-bold hover:bg-emerald-400 cursor-pointer';
+        return 'bg-emerald-600 text-white font-bold hover:bg-emerald-700 cursor-pointer';
+      };
+
+      const tableEl = document.getElementById('m3HeatmapTable');
+      tableEl.innerHTML = `
+        <thead>
+          <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+            <th class="py-2.5 px-3 text-left font-bold">หมวดหมู่ยา (Category)</th>
+            ${formGroups.map((g) => `<th class="py-2.5 px-2.5 text-center font-semibold min-w-[95px]">${escapeHtml(g.label)}</th>`).join('')}
+            <th class="py-2.5 px-3 text-center font-bold bg-slate-200/70">รวม SKUs</th>
+            <th class="py-2.5 px-3 text-center font-bold bg-slate-200/70">จำนวนรูปแบบ</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200/80">
+          ${categories
+            .map((cat) => {
+              const catItems = items.filter((i) => i.category === cat);
+              const distinctFormCount = new Set(catItems.map((i) => i.dosage_form)).size;
+              return `
+                <tr class="hover:bg-slate-50/60">
+                  <td class="py-2 px-3 font-semibold text-slate-800 whitespace-nowrap">${escapeHtml(cat)}</td>
+                  ${formGroups
+                    .map((g) => {
+                      const matched = catItems.filter((i) => g.match(i.dosage_form.toLowerCase()));
+                      const cnt = matched.length;
+                      return `
+                        <td
+                          class="py-2 px-2.5 text-center border-l border-slate-100 transition ${cellColorClass(cnt)}"
+                          ${cnt > 0 ? `onclick="showHeatmapCellDetail('${escapeHtml(cat)}', '${escapeHtml(g.label)}', '${g.key}')"` : ''}
+                        >
+                          ${cnt === 0 ? '–' : cnt}
+                        </td>
+                      `;
+                    })
+                    .join('')}
+                  <td class="py-2 px-3 text-center font-mono font-bold text-slate-900 bg-slate-50 border-l border-slate-200">${catItems.length}</td>
+                  <td class="py-2 px-3 text-center font-mono text-indigo-700 font-semibold bg-slate-50 border-l border-slate-100">${distinctFormCount}</td>
+                </tr>
+              `;
+            })
+            .join('')}
+        </tbody>
+      `;
+    }
+
+    function showHeatmapCellDetail(category, groupLabel, groupKey) {
+      const matchers = {
+        tablet: (f) => f === 'tablet',
+        capsule: (f) => f === 'capsule',
+        other_solid: (f) => ['sublingual tablet', 'chewable tablet', 'powder for oral solution'].includes(f),
+        topical: (f) => ['cream', 'ointment', 'gel'].includes(f),
+        liquid: (f) => ['syrup', 'dry syrup', 'oral suspension', 'oral solution', 'solution'].includes(f),
+        inhale: (f) => ['inhaler', 'nasal spray'].includes(f),
+        drops: (f) => ['eye drops', 'ear drops'].includes(f),
+      };
+      const fn = matchers[groupKey] || (() => true);
+      const matched = currentData.items.filter((i) => i.category === category && fn(i.dosage_form.toLowerCase()));
+
+      const drawer = document.getElementById('m3HeatmapDrilldown');
+      drawer.classList.remove('hidden');
+      drawer.innerHTML = `
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <div class="text-xs font-bold text-emerald-950">
+            📌 หมวด "${escapeHtml(category)}" • กลุ่มรูปแบบ "${escapeHtml(groupLabel)}" (${matched.length} รายการ)
+          </div>
+          <button type="button" onclick="document.getElementById('m3HeatmapDrilldown').classList.add('hidden')" class="text-xs text-emerald-800 hover:text-emerald-950 font-bold px-2">ปิด ✕</button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          ${matched
+            .map(
+              (m) => `
+            <span class="inline-flex items-center gap-1.5 rounded-lg bg-white border border-emerald-200 px-2.5 py-1 text-xs text-slate-800 shadow-2xs">
+              <strong class="font-mono text-emerald-700">${escapeHtml(m.sku)}</strong>
+              <span>${escapeHtml(m.generic_name)}</span>
+              <span class="text-slate-500">(${escapeHtml(m.strength)} • ${escapeHtml(m.dosage_form)})</span>
+            </span>
+          `
+            )
+            .join('')}
+        </div>
+      `;
+    }
+
+    function renderMode3WatchlistTable() {
+      const items = currentData.items.filter((i) => Number(i.reorder_level) <= 10);
+      const filtered = items
+        .filter((i) => {
+          if (mode3State.watchlistFilter === '5') return Number(i.reorder_level) === 5;
+          if (mode3State.watchlistFilter === '10') return Number(i.reorder_level) === 10;
+          return true;
+        })
+        .sort((a, b) => a.reorder_level - b.reorder_level || a.sku.localeCompare(b.sku));
+
+      const tbody = document.getElementById('m3WatchlistBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400">ไม่มีรายการในเงื่อนไขนี้</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered
+        .map((item) => {
+          const isCritical = Number(item.reorder_level) <= 5;
+          return `
+            <tr class="hover:bg-amber-50/40 transition-colors">
+              <td class="py-2.5 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">${escapeHtml(item.sku)}</td>
+              <td class="py-2.5 px-4 font-medium text-slate-900">${escapeHtml(item.generic_name)}</td>
+              <td class="py-2.5 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(item.strength)}</td>
+              <td class="py-2.5 px-4">
+                <span class="inline-block rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">${escapeHtml(item.dosage_form)}</span>
+              </td>
+              <td class="py-2.5 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(item.category)}</td>
+              <td class="py-2.5 px-4 font-mono text-indigo-700">${escapeHtml(item.atc_code)}</td>
+              <td class="py-2.5 px-4 text-right whitespace-nowrap">
+                <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-mono text-[11px] font-bold ${
+                  isCritical
+                    ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                    : 'bg-amber-100 text-amber-800 border border-amber-200'
+                }">
+                  ${formatNumber(item.reorder_level)} ${escapeHtml(item.unit)}
+                </span>
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+    }
+
+    // =========================================================================
+    // 10. INITIALIZE ON WINDOW LOAD
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      updateHeaderMeta();
+      switchMode('inventory');
+    });
+  </script>
+</body>
+</html>
